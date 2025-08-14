@@ -1,0 +1,82 @@
+---
+config:
+  theme: neo
+  layout: dagre
+  look: neo
+---
+flowchart TB
+ subgraph L0["L0 客户端层（前端：Vue3 + Element-Plus + ECharts）"]
+    direction TB
+        L0a["管理员 Web<br>（系统首页 / 数据统计 / 停车区域 / 车位信息 / 停车信息 / 缴费管理 / 车辆管理 / 公告信息 / 管理员信息 / 用户信息 / 区域地图 / 通知信息 / 个人资料 / 修改密码）"]
+        L0b["用户 Web<br>（系统首页 / 注册登录 / 个人信息 / 修改密码 / 公告信息 / 停车区域 / 车位信息 / 停车信息 / 缴费信息 / 车辆管理 / 用户充值）"]
+  end
+ subgraph L1["L1 访问与网关层"]
+    direction TB
+        L1a["Nginx / Ingress<br>静态资源分发 / 反向代理 / 路由"]
+        L1b["认证与授权（JWT / RBAC）<br>登录鉴权 / 角色与权限（多角色控制）"]
+        L1c["安全治理<br>限流 / 防刷 / 审计 / 日志 / CORS"]
+  end
+ subgraph L2["L2 应用层（Spring Boot 3 + MyBatis）"]
+    direction TB
+        A00["系统首页与门户（公告展示 / 概览面板）"]
+        A01["账户中心<br>（注册 / 登录 / 个人资料 / 修改密码）"]
+        A02["多角色权限控制<br>（管理员 / 用户）"]
+        A03["公告中心模块"]
+        A04["停车区域模块"]
+        A05["车位信息模块<br>（与停车区域绑定）"]
+        A06["停车信息模块<br>（入场 / 出场 / 计时）"]
+        A07["缴费管理模块<br>（费用计算 / 支付记录）"]
+        A08["车辆管理模块<br>（车辆与用户绑定）"]
+        A09["用户信息模块 / 管理员信息模块"]
+        A10["数据统计模块<br>（ECharts 图表 / 关键指标）"]
+        A11["区域地图模块<br>(如高德地图展示)"]
+        A12["通知信息模块<br>（消息查看 / 推送对接）"]
+  end
+ subgraph L3["L3 领域与数据访问层（Domain + Repository + Mapper）"]
+    direction TB
+        L3a["实体与聚合（领域模型）"]
+        L3b["仓储接口（Repository）"]
+        L3c["MyBatis Mapper（SQL 映射 / 分页 / 关联查询）"]
+  end
+ subgraph L4["L4 基础能力与三方集成"]
+    direction TB
+        L4a["Redis 缓存<br>（会话 / 验证码 / 列表缓存 / 统计加速）"]
+        L4b["对象存储/文件服务（可选）"]
+        L4c["支付/账单网关（模拟或三方）"]
+        L4d["地图服务 API（高德等）"]
+        L4e["通知通道（站内信/邮件/短信-可选）"]
+  end
+ subgraph L5["L5 数据层（数据库与消息）"]
+    direction TB
+        L5a["MySQL 5.7/8.0<br>（主数据：用户/车辆/车位/停车/缴费/公告/管理员等 8 张表）"]
+        L5b["Redis <br>（键值对缓存 / 排行与计数）"]
+  end
+ subgraph L6["L6 运行与运维层（软硬件层）"]
+    direction TB
+        L6a["容器与编排：Docker（可扩展至 K8s/Ingress）"]
+        L6b["JDK ≥ 17 / Node.js ≥ 18 / Maven ≥ 3.8"]
+        L6c["CI/CD（可选）"]
+        L6d["日志与监控（Prometheus / Grafana / ELK-可选）"]
+        L6e["服务器/云主机/物理机（操作系统 / 网络 / 存储）"]
+  end
+    L0a --> L1a
+    L0b --> L1a
+    L1a --> L1b
+    L1b --> L1c
+    L1c --> L2
+    A00 --> A01
+    A01 --> A02
+    A02 --> A03
+    A03 --> A04
+    A04 --> A05
+    A05 --> A06
+    A06 --> A07
+    A07 --> A08
+    A08 --> A09
+    A09 --> A10
+    A10 --> A11
+    A11 --> A12
+    L2 --> L3
+    L3 --> L4
+    L4 --> L5
+    L5 --> L6

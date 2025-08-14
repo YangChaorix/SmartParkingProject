@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.LocationMapper">
+
+    <!-- 显式字段映射（避免下划线到驼峰配置依赖） -->
+    <resultMap id="LocationMap" type="com.example.entity.Location">
+        <id     column="id"                property="id"/>
+        <result column="name"              property="name"/>
+        <result column="total"             property="total"/>
+        <result column="num"               property="num"/>
+
+        <result column="address"           property="address"/>
+        <result column="address_component" property="addressComponent"/>
+        <result column="province"          property="province"/>
+        <result column="city"              property="city"/>
+        <result column="district"          property="district"/>
+        <result column="longitude"         property="longitude"/>
+        <result column="latitude"          property="latitude"/>
+        <!-- 如果实体没有 createdAt/updatedAt 就不要映射它们 -->
+        <!-- <result column="created_at"        property="createdAt"/>
+        <result column="updated_at"        property="updatedAt"/> -->
+    </resultMap>
+
+    <!-- 查询全部 + 条件筛选 -->
+    <select id="selectAll" parameterType="com.example.entity.Location" resultMap="LocationMap">
+        SELECT
+        id, name, total, num,
+        address, address_component, province, city, district,
+        longitude, latitude
+        FROM location
+        <where>
+            <if test="id != null"> AND id = #{id} </if>
+            <if test="name != null and name != ''"> AND name LIKE CONCAT('%', #{name}, '%') </if>
+            <if test="total != null"> AND total = #{total} </if>
+            <if test="num != null"> AND num = #{num} </if>
+
+            <if test="province != null and province != ''"> AND province = #{province} </if>
+            <if test="city != null and city != ''"> AND city = #{city} </if>
+            <if test="district != null and district != ''"> AND district = #{district} </if>
+            <if test="address != null and address != ''"> AND address LIKE CONCAT('%', #{address}, '%') </if>
+            <!-- 如需按经纬度范围搜索可另加 min/max 参数，这里先不加 -->
+        </where>
+--         ORDER BY id DESC
+    </select>
+
+    <select id="selectById" parameterType="int" resultMap="LocationMap">
+        SELECT
+            id, name, total, num,
+            address, address_component, province, city, district,
+            longitude, latitude
+        FROM location
+        WHERE id = #{id}
+    </select>
+
+    <delete id="deleteById" parameterType="int">
+        DELETE FROM location WHERE id = #{id}
+    </delete>
+
+    <!-- 动态插入：只写入非空字段；主键使用自增 -->
+    <insert id="insert" parameterType="com.example.entity.Location"
+            useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO location
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="total != null">total,</if>
+            <if test="num != null">num,</if>
+
+            <if test="address != null">address,</if>
+            <if test="addressComponent != null">address_component,</if>
+            <if test="province != null">province,</if>
+            <if test="city != null">city,</if>
+            <if test="district != null">district,</if>
+            <if test="longitude != null">longitude,</if>
+            <if test="latitude != null">latitude,</if>
+            <!-- created_at/updated_at 让数据库默认填充即可 -->
+        </trim>
+        <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="total != null">#{total},</if>
+            <if test="num != null">#{num},</if>
+
+            <if test="address != null">#{address},</if>
+            <if test="addressComponent != null">#{addressComponent},</if>
+            <if test="province != null">#{province},</if>
+            <if test="city != null">#{city},</if>
+            <if test="district != null">#{district},</if>
+            <if test="longitude != null">#{longitude},</if>
+            <if test="latitude != null">#{latitude},</if>
+        </trim>
+    </insert>
+
+    <!-- 动态更新：仅更新传入的非空字段 -->
+    <update id="updateById" parameterType="com.example.entity.Location">
+        UPDATE location
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="total != null">total = #{total},</if>
+            <if test="num != null">num = #{num},</if>
+
+            <if test="address != null">address = #{address},</if>
+            <if test="addressComponent != null">address_component = #{addressComponent},</if>
+            <if test="province != null">province = #{province},</if>
+            <if test="city != null">city = #{city},</if>
+            <if test="district != null">district = #{district},</if>
+            <if test="longitude != null">longitude = #{longitude},</if>
+            <if test="latitude != null">latitude = #{latitude},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

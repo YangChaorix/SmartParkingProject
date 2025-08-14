@@ -1,0 +1,122 @@
+// Parking 系统数据库结构（DBML格式）
+
+Table admin {
+  id integer [primary key, note: 'ID']
+  username varchar [unique, note: '账号']
+  password varchar [note: '密码']
+  name varchar [note: '名称']
+  avatar varchar [note: '头像']
+  role varchar [note: '角色']
+  phone varchar [note: '电话']
+  email varchar [note: '邮箱']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table location {
+  id integer [primary key, note: '主键ID']
+  name varchar [note: '区域名称']
+  total integer [note: '总车位数']
+  num integer [note: '空闲车位']
+  address varchar [note: '地址信息']
+  longitude decimal(10,0) [note: '经度']
+  latitude decimal(10,0) [note: '纬度']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table parking_lot {
+  id integer [primary key, note: '主键ID']
+  name varchar [note: '车位编号']
+  location_id integer [note: '区域ID']
+  status varchar [note: '车位状态']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table vehicle {
+  id integer [primary key, note: '主键ID']
+  name varchar [note: '车牌号']
+  user_id integer [note: '用户ID']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table user {
+  id integer [primary key, note: 'ID']
+  username varchar [unique, note: '账号']
+  password varchar [note: '密码']
+  name varchar [note: '名称']
+  avatar varchar [note: '头像']
+  role varchar [note: '角色']
+  phone varchar [note: '电话']
+  email varchar [note: '邮箱']
+  account double(10,2) [note: '余额']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table parking {
+  id integer [primary key, note: '主键ID']
+  user_id integer [note: '用户ID']
+  vehicle_id varchar [note: '车辆ID']
+  location_id integer [note: '区域ID']
+  parking_lot_id integer [note: '车位ID']
+  start_time varchar [note: '入场时间']
+  end_time varchar [note: '出场时间']
+  status varchar [note: '状态']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table pay {
+  id integer [primary key, note: '主键ID']
+  user_id integer [note: '用户ID']
+  vehicle_id varchar [note: '车辆ID']
+  location_id integer [note: '区域ID']
+  parking_lot_id integer [note: '车位ID']
+  start_time varchar [note: '入场时间']
+  end_time varchar [note: '出场时间']
+  minutes integer [note: '分钟']
+  price decimal(10,2) [note: '金额']
+  status varchar [note: '缴费状态']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notice {
+  id integer [primary key, note: 'ID']
+  title varchar [note: '标题']
+  content varchar [note: '内容']
+  time varchar [note: '发布时间']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notification {
+  id integer [primary key, note: 'ID']
+  user_id integer [note: '用户ID']
+  description text [note: '通知详细描述']
+  is_read boolean [note: '是否已读(0-未读,1-已读)']
+  send_time datetime [note: '发送时间']
+  deleted boolean [note: '逻辑删除标记(0-未删除,1-已删除)']
+  created_at timestamp
+  updated_at timestamp
+}
+
+// 外键关系
+Ref: parking.user_id > user.id
+Ref: parking.vehicle_id > vehicle.id
+Ref: parking.location_id > location.id
+Ref: parking.parking_lot_id > parking_lot.id
+
+Ref: vehicle.user_id > user.id
+
+Ref: parking_lot.location_id > location.id
+
+Ref: pay.user_id > user.id
+Ref: pay.vehicle_id > vehicle.id
+Ref: pay.location_id > location.id
+Ref: pay.parking_lot_id > parking_lot.id
+
+Ref: notification.user_id > user.id

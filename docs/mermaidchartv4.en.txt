@@ -1,0 +1,98 @@
+erDiagram
+    admin {
+        int id PK "ID"
+        varchar username "账号"
+        varchar password "密码"
+        varchar name "名称"
+        varchar avatar "头像"
+        varchar role "角色"
+        varchar phone "电话"
+        varchar email "邮箱"
+    }
+
+    user {
+        int id PK "ID"
+        varchar username "账号"
+        varchar password "密码"
+        varchar name "名称"
+        varchar avatar "头像"
+        varchar role "角色"
+        varchar phone "电话"
+        varchar email "邮箱"
+        decimal account "余额"
+    }
+
+    location {
+        int id PK "主键ID"
+        varchar name "区域名称"
+        int total "总车位数"
+        int num "空闲车位"
+        varchar address "地址信息"
+        decimal longitude "经度"
+        decimal latitude "纬度"
+    }
+
+    parking_lot {
+        int id PK "主键ID"
+        varchar name "车位编号"
+        int location_id FK "区域ID"
+        varchar status "车位状态"
+    }
+
+    vehicle {
+        int id PK "主键ID"
+        varchar name "车牌号"
+        int user_id FK "用户ID"
+    }
+
+    parking {
+        int id PK "主键ID"
+        int user_id FK "用户ID"
+        int vehicle_id FK "车辆ID"
+        int location_id FK "区域ID"
+        int parking_lot_id FK "车位ID"
+        datetime start_time "入场时间"
+        datetime end_time "出场时间"
+        varchar status "状态"
+    }
+
+    pay {
+        int id PK "主键ID"
+        int user_id FK "用户ID"
+        int vehicle_id FK "车辆ID"
+        int location_id FK "区域ID"
+        int parking_lot_id FK "车位ID"
+        datetime start_time "入场时间"
+        datetime end_time "出场时间"
+        int minutes "分钟"
+        decimal price "金额"
+        varchar status "缴费状态"
+    }
+
+    notice {
+        int id PK "ID"
+        varchar title "标题"
+        varchar content "内容"
+        varchar time "发布时间"
+    }
+
+    notification {
+        int id PK "ID"
+        int user_id FK "用户ID"
+        text description "通知详细描述"
+        boolean is_read "是否已读(0-未读,1-已读)"
+        datetime send_time "发送时间"
+        boolean deleted "逻辑删除标记(0-未删除,1-已删除)"
+    }
+
+    user ||--o{ vehicle : has
+    user ||--o{ parking : parks
+    user ||--o{ pay : pays
+    user ||--o{ notification : receives
+    location ||--o{ parking_lot : contains
+    parking }o--|| vehicle : uses
+    parking }o--|| location : is located at
+    parking }o--|| parking_lot : occupies
+    pay }o--|| vehicle : is for
+    pay }o--|| location : is for
+    pay }o--|| parking_lot : is for

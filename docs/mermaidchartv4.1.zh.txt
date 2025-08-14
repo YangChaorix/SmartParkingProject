@@ -1,0 +1,70 @@
+erDiagram
+
+    用户 {
+        int 编号 PK "ID"
+        varchar 账号 "账号"
+        varchar 密码 "密码"
+        varchar 姓名 "名称"
+        varchar 头像 "头像"
+        varchar 角色 "角色"
+        varchar 电话 "电话"
+        varchar 邮箱 "邮箱"
+        decimal 余额 "余额"
+    }
+
+    区域 {
+        int 编号 PK "主键ID"
+        varchar 名称 "区域名称"
+        int 总车位数 "总车位数"
+        int 空闲车位 "空闲车位"
+        varchar 地址 "地址信息"
+        decimal 经度 "经度"
+        decimal 纬度 "纬度"
+    }
+
+    车位 {
+        int 编号 PK "主键ID"
+        varchar 车位编号 "车位编号"
+        int 区域编号 FK "区域ID"
+        varchar 状态 "车位状态"
+    }
+
+    车辆 {
+        int 编号 PK "主键ID"
+        varchar 车牌号 "车牌号"
+        int 用户编号 FK "用户ID"
+    }
+
+    停车 {
+        int 编号 PK "主键ID"
+        int 用户编号 FK "用户ID"
+        int 车辆编号 FK "车辆ID"
+        int 区域编号 FK "区域ID"
+        int 车位编号 FK "车位ID"
+        datetime 入场时间 "入场时间"
+        datetime 出场时间 "出场时间"
+        varchar 状态 "状态"
+    }
+
+    缴费 {
+        int 编号 PK "主键ID"
+        int 用户编号 FK "用户ID"
+        int 车辆编号 FK "车辆ID"
+        int 区域编号 FK "区域ID"
+        int 车位编号 FK "车位ID"
+        datetime 入场时间 "入场时间"
+        datetime 出场时间 "出场时间"
+        int 停车分钟数 "分钟"
+        decimal 金额 "金额"
+        varchar 缴费状态 "缴费状态"
+    }
+
+    通知 {
+        int 编号 PK "ID"
+        int 用户编号 FK "用户ID"
+        text 详细描述 "通知详细描述"
+        boolean 是否已读 "是否已读(0-未读,1-已读)"
+        datetime 发送时间 "发送时间"
+        boolean 逻辑删除标记 "逻辑删除标记(0-未删除,1-已删除)"
+    }
+请你把上面的MermaidER图转换位陈氏ER图，并且生成标准陈氏ER图图片

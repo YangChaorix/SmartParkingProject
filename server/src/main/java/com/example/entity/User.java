@@ -1,0 +1,116 @@
+package com.example.entity;
+
+
+/**
+ * 用户信息实体类，继承自Account类
+ */
+public class User extends Account {
+    // 主键ID
+    private Integer id;
+    // 账号
+    private String username;
+    // 密码
+    private String password;
+    // 姓名
+    private String name;
+    // 头像
+    private String avatar;
+    // 角色
+    private String role;
+    // 电话
+    private String phone;
+    // 邮箱
+    private String email;
+    // 余额
+    private Double account;
+
+    // 获取主键ID
+    public Integer getId() {
+        return id;
+    }
+
+    // 设置主键ID
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    // 获取账号
+    public String getUsername() {
+        return username;
+    }
+
+    // 设置账号
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    // 获取密码
+    public String getPassword() {
+        return password;
+    }
+
+    // 设置密码
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    // 获取姓名
+    public String getName() {
+        return name;
+    }
+
+    // 设置姓名
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // 获取头像
+    public String getAvatar() {
+        return avatar;
+    }
+
+    // 设置头像
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    // 获取角色
+    public String getRole() {
+        return role;
+    }
+
+    // 设置角色
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    // 获取电话
+    public String getPhone() {
+        return phone;
+    }
+
+    // 设置电话
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    // 获取邮箱
+    public String getEmail() {
+        return email;
+    }
+
+    // 设置邮箱
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    // 获取余额
+    public Double getAccount() {
+        return account;
+    }
+
+    // 设置余额
+    public void setAccount(Double account) {
+        this.account = account;
+    }
+}

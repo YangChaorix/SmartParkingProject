@@ -1,0 +1,129 @@
+{regionPath: "北京市,,朝阳区",…}
+address
+:
+"北京市朝阳区朝外街道朝外们写字中心A座朝外MEN写字中心A座"
+addressComponent
+:
+"{\"citycode\":\"010\",\"adcode\":\"110105\",\"businessAreas\":[{\"name\":\"朝外\",\"id\":\"110105\",\"location\":[116.443892,39.924654]},{\"name\":\"建国门\",\"id\":\"110105\",\"location\":[116.44374,39.909981]},{\"name\":\"东四\",\"id\":\"110101\",\"location\":[116.425171,39.929561]}],\"neighborhoodType\":\"\",\"neighborhood\":\"\",\"building\":\"朝外们写字中心A座\",\"buildingType\":\"商务住宅;楼宇;商务写字楼\",\"street\":\"朝阳门外大街\",\"streetNumber\":\"28-10号\",\"province\":\"北京市\",\"city\":\"\",\"district\":\"朝阳区\",\"towncode\":\"110105002000\",\"township\":\"朝外街道\"}"
+id
+:
+7
+latitude
+:
+39.922279
+longitude
+:
+116.441443
+name
+:
+"FEEE"
+num
+:
+0
+parkingLots
+:
+[]
+regionPath
+:
+"北京市,,朝阳区"
+total
+:
+0}
+根据这个request请求修改后端代码，代码如下： /**
+     * 新增
+     */
+    @PostMapping("/add")
+    public Result add(@RequestBody Location location) {
+        locationService.add(location);
+        return Result.success();
+    }   /**
+     * 添加停车区域。
+     * @param location 停车区域实体
+     */
+    public void add(Location location) {
+        locationMapper.insert(location); // 插入数据库
+    } package com.example.entity;
+
+import java.util.List;
+
+/**
+ * 区域实体类
+ */
+public class Location {
+    // 主键ID
+    private Integer id;
+    // 区域名称
+    private String name;
+    // 总车位数
+    private Integer total;
+    // 空闲车位
+    private Integer num;
+
+    // 停车场列表
+    private List<ParkingLot> parkingLots;
+
+    // 获取主键ID
+    public Integer getId() {
+        return id;
+    }
+
+    // 设置主键ID
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    // 获取区域名称
+    public String getName() {
+        return name;
+    }
+
+    // 设置区域名称
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    // 获取总车位数
+    public Integer getTotal() {
+        return total;
+    }
+
+    // 设置总车位数
+    public void setTotal(Integer total) {
+        this.total = total;
+    }
+
+    // 获取空闲车位
+    public Integer getNum() {
+        return num;
+    }
+
+    // 设置空闲车位
+    public void setNum(Integer num) {
+        this.num = num;
+    }
+
+    // 获取停车场列表
+    public List<ParkingLot> getParkingLots() {
+        return parkingLots;
+    }
+
+    // 设置停车场列表
+    public void setParkingLots(List<ParkingLot> parkingLots) {
+        this.parkingLots = parkingLots;
+    }
+} 数据库如下 CREATE TABLE `location` (
+  `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '区域名称',
+  `total` int DEFAULT '0' COMMENT '总车位数',
+  `num` int DEFAULT '0' COMMENT '空闲车位',
+  `address` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '地址信息',
+  `address_component` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci COMMENT '地址组成信息',
+  `province` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '省',
+  `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '市',
+  `district` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '区',
+  `longitude` decimal(10,7) DEFAULT NULL COMMENT '经度',
+  `latitude` decimal(10,7) DEFAULT NULL COMMENT '纬度',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci ROW_FORMAT=DYNAMIC COMMENT='区域信息表';

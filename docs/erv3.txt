@@ -1,0 +1,122 @@
+// 停车场管理系统数据库结构（中文版 DBML）
+
+Table 管理员 {
+  编号 integer [primary key, note: 'ID']
+  账号 varchar [unique, note: '账号']
+  密码 varchar [note: '密码']
+  名称 varchar [note: '名称']
+  头像 varchar [note: '头像']
+  角色 varchar [note: '角色']
+  电话 varchar [note: '电话']
+  邮箱 varchar [note: '邮箱']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 区域 {
+  编号 integer [primary key, note: '主键ID']
+  名称 varchar [note: '区域名称']
+  总车位数 integer [note: '总车位数']
+  空闲车位 integer [note: '空闲车位']
+  地址 varchar [note: '地址信息']
+  经度 decimal(10,7) [note: '经度']
+  纬度 decimal(10,7) [note: '纬度']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 车位 {
+  编号 integer [primary key, note: '主键ID']
+  车位编号 varchar [note: '车位编号']
+  区域编号 integer [note: '区域ID']
+  状态 varchar [note: '车位状态']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 车辆 {
+  编号 integer [primary key, note: '主键ID']
+  车牌号 varchar [note: '车牌号']
+  用户编号 integer [note: '用户ID']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 用户 {
+  编号 integer [primary key, note: 'ID']
+  账号 varchar [unique, note: '账号']
+  密码 varchar [note: '密码']
+  姓名 varchar [note: '名称']
+  头像 varchar [note: '头像']
+  角色 varchar [note: '角色']
+  电话 varchar [note: '电话']
+  邮箱 varchar [note: '邮箱']
+  余额 decimal(10,2) [note: '余额']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 停车 {
+  编号 integer [primary key, note: '主键ID']
+  用户编号 integer [note: '用户ID']
+  车辆编号 varchar [note: '车辆ID']
+  区域编号 integer [note: '区域ID']
+  车位编号 integer [note: '车位ID']
+  入场时间 datetime [note: '入场时间']
+  出场时间 datetime [note: '出场时间']
+  状态 varchar [note: '状态']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 缴费 {
+  编号 integer [primary key, note: '主键ID']
+  用户编号 integer [note: '用户ID']
+  车辆编号 varchar [note: '车辆ID']
+  区域编号 integer [note: '区域ID']
+  车位编号 integer [note: '车位ID']
+  入场时间 varchar [note: '入场时间']
+  出场时间 varchar [note: '出场时间']
+  停车分钟数 integer [note: '分钟']
+  金额 decimal(10,2) [note: '金额']
+  缴费状态 varchar [note: '缴费状态']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 公告 {
+  编号 integer [primary key, note: 'ID']
+  标题 varchar [note: '标题']
+  内容 varchar [note: '内容']
+  发布时间 varchar [note: '发布时间']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+Table 通知 {
+  编号 integer [primary key, note: 'ID']
+  用户编号 integer [note: '用户ID']
+  详细描述 text [note: '通知详细描述']
+  是否已读 boolean [note: '是否已读(0-未读,1-已读)']
+  发送时间 datetime [note: '发送时间']
+  逻辑删除标记 boolean [note: '逻辑删除标记(0-未删除,1-已删除)']
+  创建时间 timestamp
+  更新时间 timestamp
+}
+
+// 外键关系
+Ref: 停车.用户编号 > 用户.编号
+Ref: 停车.车辆编号 > 车辆.编号
+Ref: 停车.区域编号 > 区域.编号
+Ref: 停车.车位编号 > 车位.编号
+
+Ref: 车辆.用户编号 > 用户.编号
+
+Ref: 车位.区域编号 > 区域.编号
+
+Ref: 缴费.用户编号 > 用户.编号
+Ref: 缴费.车辆编号 > 车辆.编号
+Ref: 缴费.区域编号 > 区域.编号
+Ref: 缴费.车位编号 > 车位.编号
+
+Ref: 通知.用户编号 > 用户.编号
