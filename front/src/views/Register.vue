@@ -9,18 +9,20 @@
 
       <div class="login-content">
         <el-form :model="data.form" ref="formRef" :rules="data.rules">
-          <el-form-item prop="username">
-            <el-input :prefix-icon="User" v-model="data.form.username" placeholder="请输入账号" />
+          <el-form-item prop="email">
+            <el-input :prefix-icon="User" v-model="data.form.email" placeholder="请输入您的邮箱" />
           </el-form-item>
 
           <el-form-item prop="password">
             <el-input :prefix-icon="Lock" v-model="data.form.password" placeholder="请输入密码" show-password />
           </el-form-item>
 
-          <el-form-item prop="captchaCode">
-            <div class="captcha-wrapper">
-              <el-input v-model="data.form.captchaCode" placeholder="请输入验证码"></el-input>
-              <img :src="data.captchaImg" alt="验证码" class="captcha-img" @click="getCaptcha" title="点击刷新">
+          <el-form-item prop="verifyCode">
+            <div class="code-wrapper">
+              <el-input v-model="data.form.verifyCode" placeholder="请输入邮箱验证码" class="code-input"></el-input>
+              <el-button @click="sendverifyCode" :disabled="data.isCounting" class="send-code-button">
+                {{ data.isCounting ? `${data.countdown}s后重试` : '获取验证码' }}
+              </el-button>
             </div>
           </el-form-item>
 
@@ -38,7 +40,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref } from "vue";
 import { User, Lock } from "@element-plus/icons-vue";
 import request from "@/utils/request";
 import { ElMessage } from "element-plus";
@@ -46,66 +48,92 @@ import router from "@/router";
 
 const data = reactive({
   form: {
-    username: '',
+    email: '', // 新增：用户邮箱，同时作为用户名
     password: '',
-    captchaCode: '', // 存储用户输入的验证码
-    captchaId: '' // 存储后端返回的验证码ID
+    verifyCode: ''
   },
-  captchaImg: '', // 存储验证码图片的 Base64 数据
   rules: {
-    username: [
-      { required: true, message: '请输入账号', trigger: 'blur' },
+    email: [
+      { required: true, message: '请输入邮箱', trigger: 'blur' },
+      { type: 'email', message: '请输入有效的邮箱地址', trigger: ['blur', 'change'] }
     ],
     password: [
       { required: true, message: '请输入密码', trigger: 'blur' },
     ],
-    captchaCode: [
-      { required: true, message: '请输入验证码', trigger: 'blur' },
+    verifyCode: [
+      { required: true, message: '请输入邮箱验证码', trigger: 'blur' },
     ]
-  }
+  },
+  countdown: 30, // 倒计时调整为30秒
+  isCounting: false
 })
 
 const formRef = ref()
+let timer = null;
 
-// 获取验证码图片
-const getCaptcha = () => {
-  request.get('/captcha').then(res => {
-    if (res.code === '200' && res.data) {
-      data.form.captchaId = res.data.captchaId;
-      data.captchaImg = `data:image/png;base64,${res.data.img}`;
-    } else {
-      ElMessage.error("验证码获取失败");
+// 发送邮箱验证码
+const sendverifyCode = () => {
+  formRef.value.validateField('email', (valid) => {
+    if (valid) {
+      if (data.isCounting) return;
+
+      data.isCounting = true;
+      data.countdown = 30; // 倒计时调整为30秒
+      timer = setInterval(() => {
+        data.countdown--;
+        if (data.countdown <= 0) {
+          clearInterval(timer);
+          data.isCounting = false;
+        }
+      }, 1000);
+
+      // 调用后端接口发送验证码
+      request.post('/api/sendVerifyCode', { email: data.form.email }).then(res => {
+        if (res.code === '200') {
+          ElMessage.success("验证码已发送至您的邮箱，请注意查收");
+        } else {
+          ElMessage.error(res.msg);
+          // 如果发送失败，停止倒计时
+          clearInterval(timer);
+          data.isCounting = false;
+          data.countdown = 30;
+        }
+      }).catch(() => {
+        ElMessage.error("验证码发送失败，请检查网络");
+        // 如果请求失败，停止倒计时
+        clearInterval(timer);
+        data.isCounting = false;
+        data.countdown = 30;
+      });
     }
-  }).catch(() => {
-    ElMessage.error("验证码获取失败，请检查网络");
   });
 };
 
 const register = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-      data.form.role = 'USER';
+      // 注册时将 email 字段赋值给 username，以满足后端接口要求
+      const finalForm = {
+        ...data.form,
+        username: data.form.email,
+        role: 'USER'
+      };
 
-      request.post('/register', data.form).then(res => {
+      request.post('/register', finalForm).then(res => {
         if (res.code === '200') {
           ElMessage.success("注册成功");
+          clearInterval(timer);
+          data.isCounting = false;
           setTimeout(() => {
             router.push('/login');
           }, 500);
         } else {
           ElMessage.error(res.msg);
-          // 注册失败时，刷新验证码
-          getCaptcha();
         }
       });
     }
   });
 };
-
-// 组件挂载时自动获取一次验证码
-onMounted(() => {
-  getCaptcha();
-});
 </script>
 
 <style lang="scss" scoped>
@@ -206,20 +234,29 @@ onMounted(() => {
         }
       }
 
-      // 新增：验证码区域的样式
-      .captcha-wrapper {
+      .code-wrapper {
         display: flex;
         align-items: center;
         gap: 10px;
+
+        // 让输入框自动填充剩余空间
+        .code-input {
+          flex: 1;
+        }
       }
 
-      .captcha-img {
-        width: 120px;
+      .send-code-button {
         height: 48px;
+        font-size: 14px;
+        min-width: 120px;
         border-radius: 12px;
-        cursor: pointer;
-        background-color: #f5f5f5;
-        border: 1px solid #dcdfe6;
+        transition: all 0.3s ease;
+
+        &.is-disabled {
+          background-color: #e4e7ed;
+          color: #a8abb2;
+          border-color: #e4e7ed;
+        }
       }
 
       .login-button {

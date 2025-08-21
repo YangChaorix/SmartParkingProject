@@ -6,6 +6,9 @@
         <div class="search-inputs">
           <el-input v-model="data.userName" placeholder="请输入用户姓名查询" class="search-input" />
           <el-input v-model="data.vehicleName" placeholder="请输入车牌号查询" class="search-input" />
+          <el-select v-model="data.locationId" placeholder="请选择所属区域筛选" clearable class="search-select">
+            <el-option v-for="item in data.locationList" :key="item.id" :value="item.id" :label="item.name" />
+          </el-select>
           <el-button type="primary" @click="load">查询</el-button>
           <el-button @click="reset">重置</el-button>
           <el-button v-if="data.user.role === 'ADMIN'" type="success" @click="handleAdd">车辆入场</el-button>
@@ -202,7 +205,8 @@ const load = async () => {
         pageNum: data.pageNum,
         pageSize: data.pageSize,
         userName: data.userName,
-        vehicleName: data.vehicleName
+        vehicleName: data.vehicleName,
+        locationId: data.locationId
       }
     })
     data.tableData = res.data?.list || []
@@ -265,6 +269,7 @@ const save = () => {
 const reset = () => {
   data.userName = null
   data.vehicleName = null
+  data.locationId = null
   load()
 }
 
@@ -417,6 +422,10 @@ load()
 
 .search-input {
   width: 240px;
+}
+
+.search-select {
+  width: 200px; /* 新增：为下拉框设置宽度 */
 }
 
 .custom-table {

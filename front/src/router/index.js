@@ -74,7 +74,7 @@ const router = createRouter({
         {
           path: 'map',
           meta: { name: '地图概览' },
-          component: () => import('@/views/manager/map.vue'),
+          component: () => import('@/views/manager/Map.vue'),
         },
         // 通知信息
         {

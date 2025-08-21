@@ -5,6 +5,9 @@
       <div class="search-wrapper">
         <div class="search-inputs">
           <el-input v-model="data.name" placeholder="请输入车位编号查询" class="search-input" />
+          <el-select v-model="data.locationId" placeholder="请选择所属区域筛选" clearable class="search-select">
+            <el-option v-for="item in data.locationList" :key="item.id" :value="item.id" :label="item.name" />
+          </el-select>
           <el-button type="primary" @click="load">查询</el-button>
           <el-button @click="reset">重置</el-button>
           <div class="action-buttons" v-if="data.user.role === 'ADMIN'">
@@ -137,7 +140,8 @@ const load = async () => {
       params: {
         pageNum: data.pageNum,
         pageSize: data.pageSize,
-        name: data.name
+        name: data.name,
+        locationId: data.locationId
       }
     })
     data.tableData = res.data?.list || []
@@ -255,8 +259,10 @@ const save = () => {
   })
 }
 
+
 const reset = () => {
   data.name = null
+  data.locationId = null
   load()
 }
 
@@ -304,6 +310,9 @@ load()
   width: 240px;
 }
 
+.search-select {
+  width: 200px; /* 新增：为下拉框设置宽度 */
+}
 .action-buttons {
   display: flex;
   gap: 12px;

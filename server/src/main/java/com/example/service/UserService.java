@@ -13,6 +13,8 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -142,6 +144,15 @@ public class UserService {
     public void register(Account account) {
         User user = new User();
         user.setUsername(account.getUsername());
+
+        // 2. 判断用户名是否为邮箱格式，如果是则将邮箱字段也设置进去
+        String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        Matcher matcher = pattern.matcher(account.getUsername());
+        if (matcher.matches()) {
+            user.setEmail(account.getUsername());
+        }
+
         // 这里需要对注册的账户密码进行加密处理
         String md5Password = DigestUtils.md5DigestAsHex(account.getPassword().getBytes());
         user.setPassword(md5Password);

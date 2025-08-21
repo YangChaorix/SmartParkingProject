@@ -6,17 +6,14 @@ import com.example.mapper.NotificationMapper;
 import com.example.mapper.UserMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.mail.*;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Properties;
+import com.example.utils.MailUtils;
 
 @Service
 public class NotificationService {
@@ -26,25 +23,8 @@ public class NotificationService {
     @Resource
     private UserMapper userMapper;
 
-    //  QQ邮箱 SMTP 服务器
-    @Value("${mail.smtp.host:smtp.qq.com}")
-    private String smtpHost;
-
-    // 邮箱服务器端口 默认 465
-    @Value("${mail.smtp.port:465}")
-    private int smtpPort;
-
-    // 邮箱服务器用户名
-    @Value("${mail.smtp.username:}")
-    private String smtpUsername;
-
-    // 邮箱服务器密码
-    @Value("${mail.smtp.password:}")
-    private String smtpPassword;
-
-    // 发件人邮箱
-    @Value("${mail.smtp.from:}")
-    private String fromEmail;
+    @Resource
+    private MailUtils mailUtils;
 
     /**
      * 添加通知
@@ -65,10 +45,10 @@ public class NotificationService {
         if (email != null && !email.trim().isEmpty()) {
             // 发送邮件
             try {
-                sendEmail(email, notification);
+                sendNotification(email, notification);
 //                System.out.println("邮件发送成功到: " + email);
             } catch (Exception e) {
-//                System.err.println("邮件发送失败: " + e.getMessage());
+                System.err.println("邮件发送失败: " + e.getMessage());
                 // 业务抛出异常或记录日志
                 throw new RuntimeException("邮件发送失败", e);
             }
@@ -77,41 +57,18 @@ public class NotificationService {
 
     /**
      * 发送邮件
-     * @param toEmail 收件人邮箱
+     * @param email 收件人邮箱
      * @param notification 通知对象
      * @throws MessagingException 邮件发送异常
      */
-    private void sendEmail(String toEmail, Notification notification) throws MessagingException {
-        // 配置邮件服务器
-        Properties props = new Properties();
-        props.put("mail.smtp.host", smtpHost);
-        props.put("mail.smtp.port", smtpPort);
-        props.put("mail.smtp.ssl.enable", "true");
-        props.put("mail.smtp.auth", "true");
-
-        // 创建邮件会话
-        Session session = Session.getInstance(props, new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(smtpUsername, smtpPassword);
-            }
-        });
-
-        // 创建邮件对象
-        MimeMessage message = new MimeMessage(session);
-        message.setFrom(new InternetAddress(fromEmail != null ? fromEmail : smtpUsername));
-        message.addRecipient(Message.RecipientType.TO, new InternetAddress(toEmail));
+    private void sendNotification(String email, Notification notification) throws MessagingException {
 
         // 设置邮件主题，如果notification有标题则使用，否则使用默认标题
         String subject = "停车场管理系统通知";
-        message.setSubject(subject);
 
-        // 设置邮件正文（带HTML格式）
-        String htmlContent = buildEmailContent(notification);
-        message.setContent(htmlContent, "text/html;charset=UTF-8");
+        String emailContent = buildEmailContent(notification);
 
-        // 发送邮件
-        Transport.send(message);
+        mailUtils.sendEmail(email, subject, emailContent);
     }
 
     /**

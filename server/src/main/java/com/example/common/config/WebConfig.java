@@ -24,6 +24,6 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor) // 添加JwtInterceptor
                 .addPathPatterns("/**") // 拦截所有请求
                 .excludePathPatterns("/") // 排除根路径
-                .excludePathPatterns("/login", "/register", "/files/**", "/role/selectAll", "/captcha"); // 排除不需要拦截的路径
+                .excludePathPatterns("/login", "/register", "/files/**", "/role/selectAll", "/api/captcha", "/api/sendVerifyCode"); // 排除不需要拦截的路径
     }
 }

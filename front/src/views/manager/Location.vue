@@ -142,11 +142,7 @@
 import { reactive, ref, nextTick, computed } from "vue"
 import request from "@/utils/request"
 import { ElMessage, ElMessageBox } from "element-plus"
-import AMapLoader from '@amap/amap-jsapi-loader'
-
-window._AMapSecurityConfig = {
-  securityJsCode: 'da9d610dfc749c07c309110c4bea36a9',
-}
+import { getAMap } from "@/utils/amap"; // 引入新的地图加载器
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}'),
@@ -157,13 +153,13 @@ const data = reactive({
   formVisible: false,
   form: {
     name: '',
-    address: '',      // 展示用：完整地址
+    address: '',
     longitude: null,
     latitude: null,
     province: '',
     city: '',
     district: '',
-    addressComponent: '', // addressComponent 的 JSON 字符串
+    addressComponent: '',
   },
   ids: [],
   name: null,
@@ -191,12 +187,6 @@ const locationText = computed(() => {
   return ''
 })
 
-/**
- * 同步隐藏字段：
- * - province, city, district
- * - addressComponent: addressComponent 的 JSON 字符串
- * 返回展示用完整地址 formattedAddress
- */
 const formatAddress = (regeocode) => {
   if (!regeocode) {
     data.form.province = ''
@@ -365,14 +355,10 @@ const openMapDialog = () => {
 }
 
 const initMap = () => {
-  AMapLoader.load({
-    key: "33db54a7c97834abfcc4331c062a06fe",
-    version: "2.0",
-    plugins: ['AMap.Geocoder', 'AMap.PlaceSearch'],
-  }).then((AMap) => {
+  getAMap().then(AMap => {
     map = new AMap.Map('map-container', {
       zoom: 12,
-      center: [data.form.longitude || 116.397428, data.form.latitude || 39.90923],
+      center: [data.form.longitude || 121.473018, data.form.latitude || 31.232152],
     });
 
     if (data.form.longitude && data.form.latitude) {
@@ -402,14 +388,11 @@ const initMap = () => {
 
       geocoder.getAddress(e.lnglat, (status, result) => {
         if (status === 'complete' && result.regeocode) {
-          data.form.address = formatAddress(result.regeocode) // 同步省,市,区与addressComponent
+          data.form.address = formatAddress(result.regeocode)
           ElMessage.success(`已通过点击地图选择位置：${data.form.address}`)
         } else {
           data.form.address = '地址解析失败'
-          data.form.province = ''
-          data.form.city = ''
-          data.form.district = ''
-          data.form.addressComponent = ''
+          formatAddress(null); // 清空地址相关字段
           ElMessage.warning('地址解析失败')
         }
       })
@@ -423,9 +406,8 @@ const initMap = () => {
       panel: '',
     });
 
-  }).catch((e) => {
-    console.error(e);
-    ElMessage.error('高德地图加载失败，请检查密钥或网络连接');
+  }).catch(e => {
+    console.error("地图初始化失败", e);
   });
 }
 
@@ -456,14 +438,11 @@ const selectSearchResult = (poi) => {
 
   geocoder.getAddress([lng, lat], (status, result) => {
     if (status === 'complete' && result.regeocode) {
-      data.form.address = formatAddress(result.regeocode) // 同步省,市,区与addressComponent
+      data.form.address = formatAddress(result.regeocode)
       ElMessage.success(`已选择 ${name}，地址：${data.form.address}`)
     } else {
       data.form.address = poi.address ? `${name} (${poi.address})` : name;
-      data.form.province = ''
-      data.form.city = ''
-      data.form.district = ''
-      data.form.addressComponent = ''
+      formatAddress(null); // 清空地址相关字段
       ElMessage.warning('地址解析失败，已使用原始地址')
     }
   });
@@ -494,6 +473,7 @@ load()
 </script>
 
 <style scoped>
+/* 样式部分保持不变 */
 .parking-container {
   padding: 20px;
   background-color: #f5f7fa;
@@ -636,24 +616,5 @@ load()
 .result-address {
   font-size: 12px;
   color: #909399;
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.table-card {
-  animation: slideIn 0.4s ease;
 }
 </style>

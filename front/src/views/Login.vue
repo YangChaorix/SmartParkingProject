@@ -5,14 +5,13 @@
         <a href="#" class="role-switcher" @click.prevent="toggleLoginType">
           {{ loginType === 'USER' ? '管理员登录' : '返回用户登录' }}
         </a>
-        <img src="@/assets/imgs/logo.png" alt="logo" class="logo">
+        <img :src="getLogoSrc" alt="logo" class="logo">
 
         <div v-if="loginType === 'USER'">
           <h2>停车场管理系统</h2>
           <p class="sub-title">用户登录</p>
         </div>
         <div v-else class="admin-title-container">
-          <el-icon :size="32" class="admin-icon"><Setting /></el-icon>
           <h2>管理后台</h2>
           <p class="sub-title">管理员登录</p>
         </div>
@@ -28,7 +27,20 @@
             <el-input :prefix-icon="Lock" v-model="data.form.password" placeholder="请输入密码" show-password />
           </el-form-item>
 
-          <el-button type="primary" class="login-button" @click="login">
+          <el-form-item prop="captchaCode">
+            <div class="captcha-wrapper">
+              <el-input v-model="data.form.captchaCode" placeholder="请输入验证码" class="captcha-input"></el-input>
+              <img v-if="data.captchaImg" :src="data.captchaImg" alt="验证码" class="captcha-image" @click="getCaptcha">
+              <div v-else class="captcha-loading" @click="getCaptcha">加载中...</div>
+            </div>
+          </el-form-item>
+
+          <el-button
+              type="primary"
+              class="login-button"
+              @click="login"
+              :disabled="!data.form.captchaId"
+          >
             登 录
           </el-button>
 
@@ -42,11 +54,13 @@
 </template>
 
 <script setup>
-import { reactive, ref, watch } from "vue";
+import { reactive, ref, watch, onBeforeMount, computed } from "vue";
 import { useRoute, useRouter } from 'vue-router';
-import { User, Lock, Setting } from "@element-plus/icons-vue";
+import { User, Lock } from "@element-plus/icons-vue";
 import request from "@/utils/request";
 import { ElMessage } from "element-plus";
+import logo from '@/assets/imgs/logo.png';
+import adminLogo from '@/assets/imgs/logo-admin.png';
 
 const route = useRoute();
 const router = useRouter();
@@ -54,7 +68,10 @@ const router = useRouter();
 const loginType = ref('USER');
 const formRef = ref();
 const data = reactive({
-  form: {},
+  form: {
+    captchaId: '',
+    captchaCode: ''
+  },
   rules: {
     username: [
       { required: true, message: '请输入账号', trigger: 'blur' },
@@ -62,7 +79,66 @@ const data = reactive({
     password: [
       { required: true, message: '请输入密码', trigger: 'blur' },
     ],
-  }
+    captchaCode: [
+      { required: true, message: '请输入验证码', trigger: 'blur' },
+      { min: 4, max: 4, message: '验证码为4位', trigger: 'blur' }
+    ]
+  },
+  captchaImg: ''
+});
+
+// 获取验证码
+const getCaptcha = () => {
+  request.get('/api/captcha').then(res => {
+    if (res.code === '200') {
+      data.captchaImg = 'data:image/jpeg;base64,' + res.data.img;
+      data.form.captchaId = res.data.captchaId;
+    } else {
+      ElMessage.error(res.msg);
+    }
+  }).catch(error => {
+    ElMessage.error("获取验证码失败");
+    console.error(error);
+  });
+};
+
+const login = () => {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      const loginForm = { ...data.form, role: loginType.value };
+      request.post('/login', loginForm).then(res => {
+        if (res.code === '200') {
+          ElMessage.success("登录成功");
+          localStorage.setItem('xm-user', JSON.stringify(res.data));
+          router.replace({ path: '/manager/home', query: {} });
+        } else {
+          ElMessage.error(res.msg);
+          getCaptcha();
+        }
+      }).catch(error => {
+        ElMessage.error("登录失败，请稍后重试");
+        console.error(error);
+        getCaptcha();
+      });
+    }
+  });
+};
+
+const toggleLoginType = () => {
+  const newType = loginType.value === 'USER' ? 'ADMIN' : 'USER';
+  router.replace({
+    query: newType === 'ADMIN' ? { loginType: 'ADMIN' } : {}
+  });
+};
+
+const getLogoSrc = computed(() => {
+  return loginType.value === 'USER' ? logo : adminLogo;
+});
+
+
+// 将 watch 和 onBeforeMount 放到函数的声明之后
+onBeforeMount(() => {
+  getCaptcha();
 });
 
 watch(() => route.query.loginType, (newTypeQuery) => {
@@ -74,35 +150,9 @@ watch(() => route.query.loginType, (newTypeQuery) => {
       formRef.value.resetFields();
     }
     data.form = {};
+    getCaptcha();
   }
 }, { immediate: true });
-
-const toggleLoginType = () => {
-  const newType = loginType.value === 'USER' ? 'ADMIN' : 'USER';
-  router.replace({
-    query: newType === 'ADMIN' ? { loginType: 'ADMIN' } : {}
-  });
-};
-
-const login = () => {
-  formRef.value.validate((valid) => {
-    if (valid) {
-      data.form.role = loginType.value;
-      request.post('/login', data.form).then(res => {
-        if (res.code === '200') {
-          ElMessage.success("登录成功");
-          localStorage.setItem('xm-user', JSON.stringify(res.data));
-          router.replace({ path: '/manager/home', query: {} });
-        } else {
-          ElMessage.error(res.msg);
-        }
-      }).catch(error => {
-        ElMessage.error("登录失败，请稍后重试");
-        console.error(error);
-      });
-    }
-  });
-};
 </script>
 
 <style lang="scss" scoped>
@@ -193,7 +243,6 @@ const login = () => {
       flex-direction: column;
       align-items: center;
       gap: 10px;
-      margin-bottom: -10px;
 
       .admin-icon {
         color: #334155;
@@ -238,6 +287,37 @@ const login = () => {
       }
     }
 
+    .captcha-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .captcha-input {
+      flex: 1;
+    }
+
+    .captcha-image {
+      width: 120px;
+      height: 48px;
+      cursor: pointer;
+      border-radius: 12px;
+      border: 1px solid #dcdfe6;
+    }
+
+    .captcha-loading {
+      width: 120px;
+      height: 48px;
+      line-height: 48px;
+      text-align: center;
+      color: #94a3b8;
+      font-size: 14px;
+      background-color: #f0f2f5;
+      border-radius: 12px;
+      border: 1px dashed #dcdfe6;
+      cursor: pointer;
+    }
+
     .login-button {
       width: 100%;
       height: 48px;
@@ -252,6 +332,13 @@ const login = () => {
         background: #4338ca;
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+      }
+
+      &:disabled {
+        background: #c6c6c6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
       }
     }
 
@@ -299,6 +386,12 @@ const login = () => {
       &:hover {
         background: #334155;
         box-shadow: 0 4px 12px rgba(71, 85, 105, 0.25);
+      }
+      &:disabled {
+        background: #c6c6c6;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
       }
     }
   }
