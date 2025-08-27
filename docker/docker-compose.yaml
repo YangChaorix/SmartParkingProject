@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # MySQL数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: smart_parking_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: your_root_password  # 替换为你自己的root密码
+      MYSQL_DATABASE: parking                 # 数据库名
+      MYSQL_USER: springboot                  # 用户名
+      MYSQL_PASSWORD: springboot_password     # 用户密码
+    ports:
+      - "3306:3306"
+    volumes:
+      - /Users/yangchao/icce.shu.edu.cn/project/data/mysql:/var/lib/mysql           # 数据持久化
+      - ./parkingv3.sql:/docker-entrypoint-initdb.d/parkingv3.sql  # 数据库初始化
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # Redis缓存服务
+  redis:
+    image: redis:8-alpine
+    container_name: smart_parking_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data/redis:/data                    # 数据持久化
+
+  # Spring Boot后端服务
+  backend:
+    build:
+      context: ./server                       # Dockerfile路径，假设在server目录下
+      dockerfile: Dockerfile
+    container_name: smart_parking_backend
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/parking?useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: springboot
+      SPRING_DATASOURCE_PASSWORD: springboot_password
+      SPRING_REDIS_HOST: redis
+      # 其他后端配置，如邮箱、文件上传路径等，可以根据application.yml内容添加
+
+  # Vue前端服务
+  frontend:
+    build:
+      context: ./front                        # Dockerfile路径，假设在front目录下
+      dockerfile: Dockerfile
+    container_name: smart_parking_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
