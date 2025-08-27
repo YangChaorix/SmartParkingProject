@@ -7,14 +7,17 @@ import cn.hutool.core.util.StrUtil;
 import com.example.common.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,29 +30,43 @@ public class FileController {
 
     private static final Logger log = LoggerFactory.getLogger(FileController.class);
 
-    private static final String filePath = System.getProperty("user.dir") + "/files/";
-
-    @Value("${fileBaseUrl:}")
-    private String fileBaseUrl;
+    // 文件存储的基础路径
+    private static final String fileBasePath = System.getProperty("user.dir") + "/files/";
 
     /**
      * 文件上传
      */
     @PostMapping("/upload")
     public Result upload(MultipartFile file) {
-        String fileName = file.getOriginalFilename();
+        String originalFilename = file.getOriginalFilename();
+
+        // 1. 【核心修改】获取当前日期并生成 YYYY/MM/dd 格式的路径
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy" + File.separator + "MM" + File.separator + "dd");
+        String datePath = today.format(formatter); // 生成例如 "2025/08/27" 的路径
+
+        // 2. 【核心修改】创建包含日期路径的完整目录
+        String fullDirectoryPath = fileBasePath + datePath;
+        if (!FileUtil.isDirectory(fullDirectoryPath)) {
+            FileUtil.mkdir(fullDirectoryPath);
+        }
+
+        // 3. 生成新的唯一文件名并拼接完整物理路径
+        String newFileName = System.currentTimeMillis() + "-" + originalFilename;
+        String realFilePath = fullDirectoryPath + File.separator + newFileName;
+
         try {
-            if (!FileUtil.isDirectory(filePath)) {
-                FileUtil.mkdir(filePath);
-            }
-            fileName = System.currentTimeMillis() + "-" + fileName;
-            String realFilePath = filePath + fileName;
-            // 文件存储形式：时间戳-文件名
+            // 4. 将文件写入目标路径
             FileUtil.writeBytes(file.getBytes(), realFilePath);
         } catch (Exception e) {
-            log.error(fileName + "--文件上传失败", e);
+            log.error(originalFilename + "--文件上传失败", e);
+            // 可以在这里返回一个错误结果
+            // return Result.error("文件上传失败");
         }
-        String url = fileBaseUrl + "/files/download/" + fileName;
+
+        // 5. 【核心修改】返回包含日期路径的URL给前端
+        // URL路径使用斜杠'/'，即使在Windows系统上
+        String url = "/files/download/" + datePath.replace(File.separator, "/") + "/" + newFileName;
         return Result.success(url);
     }
 
@@ -57,21 +74,31 @@ public class FileController {
     /**
      * 获取文件
      */
-    @GetMapping("/download/{fileName}")
-    public void download(@PathVariable String fileName, HttpServletResponse response) {
+    @GetMapping("/download/**") // 【核心修改】使用 ** 来匹配多级路径，例如 /download/2025/08/27/file.jpg
+    public void download(HttpServletRequest request, HttpServletResponse response) {
+        // 从请求URL中动态提取文件路径
+        String requestURI = request.getRequestURI();
+        String filePathSuffix = requestURI.substring(requestURI.indexOf("/download/") + "/download/".length());
+
         OutputStream os;
         try {
-            if (StrUtil.isNotEmpty(fileName)) {
+            if (StrUtil.isNotEmpty(filePathSuffix)) {
+                // 拼接文件的完整物理路径
+                String realFilePath = fileBasePath + filePathSuffix;
+
+                // 从路径中提取原始文件名，用于下载时显示
+                String fileName = filePathSuffix.substring(filePathSuffix.lastIndexOf("/") + 1);
+
                 response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
                 response.setContentType("application/octet-stream");
-                byte[] bytes = FileUtil.readBytes(filePath + fileName);
+                byte[] bytes = FileUtil.readBytes(realFilePath);
                 os = response.getOutputStream();
                 os.write(bytes);
                 os.flush();
                 os.close();
             }
         } catch (Exception e) {
-            log.warn("文件下载失败：" + fileName);
+            log.warn("文件下载失败：" + filePathSuffix);
         }
     }
 
@@ -80,22 +107,34 @@ public class FileController {
      */
     @PostMapping("/wang/upload")
     public Map<String, Object> wangEditorUpload(MultipartFile file) {
-        String flag = System.currentTimeMillis() + "";
-        String fileName = file.getOriginalFilename();
-        try {
-            // 文件存储形式：时间戳-文件名
-            FileUtil.writeBytes(file.getBytes(), filePath + flag + "-" + fileName);
-            System.out.println(fileName + "--上传成功");
-            Thread.sleep(1L);
-        } catch (Exception e) {
-            System.err.println(fileName + "--文件上传失败");
+        String originalFilename = file.getOriginalFilename();
+
+        // 同样，为wang-editor的上传也增加日期路径
+        LocalDate today = LocalDate.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy" + File.separator + "MM" + File.separator + "dd");
+        String datePath = today.format(formatter);
+
+        String fullDirectoryPath = fileBasePath + datePath;
+        if (!FileUtil.isDirectory(fullDirectoryPath)) {
+            FileUtil.mkdir(fullDirectoryPath);
         }
-        String http = fileBaseUrl + "/files/download/";
+
+        String newFileName = System.currentTimeMillis() + "-" + originalFilename;
+        String realFilePath = fullDirectoryPath + File.separator + newFileName;
+
+        try {
+            FileUtil.writeBytes(file.getBytes(), realFilePath);
+            System.out.println(originalFilename + "--上传成功");
+        } catch (Exception e) {
+            System.err.println(originalFilename + "--文件上传失败");
+        }
+
+        // 返回给编辑器的URL也必须是包含日期路径的完整URL
+        String url = "/files/download/" + datePath.replace(File.separator, "/") + "/" + newFileName;
+
         Map<String, Object> resMap = new HashMap<>();
-        // wangEditor上传图片成功后， 需要返回的参数
         resMap.put("errno", 0);
-        resMap.put("data", CollUtil.newArrayList(Dict.create().set("url", http + flag + "-" + fileName)));
+        resMap.put("data", CollUtil.newArrayList(Dict.create().set("url", url)));
         return resMap;
     }
-
 }

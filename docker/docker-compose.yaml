@@ -1,63 +1,70 @@
 version: '3.8'
 
 services:
-  # MySQL数据库服务
-  mysql:
-    image: mysql:8.0
-    container_name: smart_parking_mysql
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: your_root_password  # 替换为你自己的root密码
-      MYSQL_DATABASE: parking                 # 数据库名
-      MYSQL_USER: springboot                  # 用户名
-      MYSQL_PASSWORD: springboot_password     # 用户密码
-    ports:
-      - "3306:3306"
-    volumes:
-      - /Users/yangchao/icce.shu.edu.cn/project/data/mysql:/var/lib/mysql           # 数据持久化
-      - ./parkingv3.sql:/docker-entrypoint-initdb.d/parkingv3.sql  # 数据库初始化
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 20s
-      retries: 10
-
-  # Redis缓存服务
-  redis:
-    image: redis:8-alpine
-    container_name: smart_parking_redis
-    restart: always
-    ports:
-      - "6379:6379"
-    volumes:
-      - ./data/redis:/data                    # 数据持久化
-
-  # Spring Boot后端服务
+  # 后端 SpringBoot 服务
+  # 在Docker网络中，我们称这个服务为 'backend'，以匹配 Nginx 的配置
   backend:
+    # 构建镜像时，Docker会去上级目录的 'server' 文件夹里寻找 Dockerfile
     build:
-      context: ./server                       # Dockerfile路径，假设在server目录下
+      context: ../backend
       dockerfile: Dockerfile
     container_name: smart_parking_backend
-    restart: always
     ports:
-      - "8080:8080"
+      - "18080:8080"
+    volumes:
+      # 用于持久化存储用户上传的文件
+      - ./volumes/backend/files:/app/files
+      - ./volumes/backend/application.yml:/app/application.yml
     depends_on:
       - mysql
       - redis
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/parking?useSSL=false&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: springboot
-      SPRING_DATASOURCE_PASSWORD: springboot_password
-      SPRING_REDIS_HOST: redis
-      # 其他后端配置，如邮箱、文件上传路径等，可以根据application.yml内容添加
+    networks:
+      - smartparking-net
 
-  # Vue前端服务
+  # 前端 Nginx 服务
   frontend:
+    # 构建镜像时，Docker会去上级目录的 'frontend' 文件夹里寻找 Dockerfile
     build:
-      context: ./front                        # Dockerfile路径，假设在front目录下
+      context: ../frontend
       dockerfile: Dockerfile
     container_name: smart_parking_frontend
-    restart: always
     ports:
-      - "80:80"
+      - "80:80"      # 将容器的80端口映射到你电脑的80端口
+    volumes:
+      - ../frontend/dist:/usr/share/nginx/html
     depends_on:
       - backend
+    networks:
+      - smartparking-net
+
+  # MySQL 数据库服务
+  mysql:
+    image: mysql:8.0
+    container_name: smart_parking_mysql
+    ports:
+      - "13306:3306" # 将容器的3306端口映射到你电脑的3306端口
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456  # 设置root用户密码
+      MYSQL_DATABASE: parking      # 启动时自动创建名为'parking'的数据库
+    volumes:
+      - ./volumes/mysql:/var/lib/mysql
+    networks:
+      - smartparking-net
+
+  # Redis 服务
+  redis:
+    image: redis:8-alpine
+    container_name: smart_parking_redis
+    ports:
+      - "16379:6379" # 将容器的6379端口映射到主机的6379端口
+    networks:
+      - smartparking-net
+# 定义自定义网络，让所有容器可以通过服务名（如 'backend', 'mysql_db'）互相访问
+networks:
+  smartparking-net:
+    driver: bridge
+
+# 定义数据卷，用于持久化存储数据
+volumes:
+  uploaded_files:
+  mysql_data:
