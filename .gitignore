@@ -17,6 +17,7 @@ build/
 target/
 build/
 out/
+files/
 *.class
 *.jar
 *.war

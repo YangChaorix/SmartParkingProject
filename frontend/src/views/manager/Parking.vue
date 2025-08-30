@@ -48,7 +48,7 @@
         <el-table-column label="停车时长">
           <template #default="scope">
             <span class="table-cell-text">{{ calculateDuration(scope.row.startTime, scope.row.endTime || new
-              Date()) }}</span>
+            Date()) }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态">
@@ -77,13 +77,13 @@
       <!-- Pagination moved inside table card -->
       <div class="pagination-wrapper" v-if="data.total">
         <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-          @current-change="load" background layout="total, prev, pager, next" />
+                       @current-change="load" background layout="total, prev, pager, next" />
       </div>
     </div>
 
     <!-- Dialog Section -->
     <el-dialog :title="data.flag ? '车辆入场' : '车辆出场'" v-model="data.formVisible" width="40%" :close-on-click-modal="false"
-      destroy-on-close class="custom-dialog">
+               destroy-on-close class="custom-dialog">
       <el-form :rules="data.rules" :model="data.form" label-width="80px" ref="formRef" class="parking-form">
         <el-form-item label="用户" prop="userId" v-if="data.flag">
           <el-select v-model="data.form.userId" @change="initVehicle" class="custom-select">
@@ -103,16 +103,16 @@
         <el-form-item label="车位" prop="parkingLotId" v-if="data.flag">
           <el-select style="width: 100%" v-model="data.form.parkingLotId">
             <el-option v-for="item in data.parkingLotList" :key="item.id" :value="item.id"
-              :label="item.name"></el-option>
+                       :label="item.name"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="入场时间" prop="startTime" v-if="data.flag">
           <el-date-picker placeholder="请选择日期时间" type="datetime" format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss" v-model="data.form.startTime" style="width: 100%"></el-date-picker>
+                          value-format="YYYY-MM-DD HH:mm:ss" v-model="data.form.startTime" style="width: 100%"></el-date-picker>
         </el-form-item>
         <el-form-item label="出场时间" prop="endTime" v-if="!data.flag">
           <el-date-picker placeholder="请选择日期时间" type="datetime" format="YYYY-MM-DD HH:mm:ss"
-            value-format="YYYY-MM-DD HH:mm:ss" v-model="data.form.endTime" style="width: 100%"></el-date-picker>
+                          value-format="YYYY-MM-DD HH:mm:ss" v-model="data.form.endTime" style="width: 100%"></el-date-picker>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -125,12 +125,12 @@
 
     <!-- Notification Dialog -->
     <el-dialog v-model="data.notificationVisible" :show-close="false" width="560px" :close-on-click-modal="false"
-      destroy-on-close class="notification-dialog apple-style-dialog">
+               destroy-on-close class="notification-dialog apple-style-dialog">
       <div class="notification-content">
         <el-form :model="data.notificationForm" label-width="0" ref="notificationFormRef">
           <el-form-item prop="description">
             <el-input v-model="data.notificationForm.description" type="textarea" :rows="8" placeholder="请输入提醒内容..."
-              resize="none" class="custom-textarea" />
+                      resize="none" class="custom-textarea" />
           </el-form-item>
         </el-form>
       </div>
@@ -140,7 +140,7 @@
             取消
           </el-button>
           <el-button type="primary" @click="sendNotification" :disabled="!data.notificationForm.description"
-            class="send-button">
+                     class="send-button">
             发送
           </el-button>
         </div>
@@ -342,6 +342,10 @@ const loadUser = () => {
 }
 loadUser()
 const initVehicle = (userId) => {
+  // 修复bug: 切换用户时，清空车辆列表
+  data.vehicleList = []
+  data.form.vehicleId = null;
+
   request.get('/vehicle/selectAll', {
     params: {
       userId: userId
@@ -365,6 +369,10 @@ const loadLocation = () => {
 }
 loadLocation()
 const initParkingLot = (locationId) => {
+  // 修复bug: 切换区域时，清空车位列表
+  data.parkingLotList = []
+  data.form.parkingLotId = null;
+
   request.get('/parkingLot/selectAll', {
     params: {
       locationId: locationId,
@@ -425,7 +433,8 @@ load()
 }
 
 .search-select {
-  width: 200px; /* 新增：为下拉框设置宽度 */
+  width: 200px;
+  /* 新增：为下拉框设置宽度 */
 }
 
 .custom-table {

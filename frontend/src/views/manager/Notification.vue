@@ -1,10 +1,10 @@
 <template>
   <div class="notification-container">
-    <!-- Search Section -->
     <div class="search-card">
       <div class="search-wrapper">
         <div class="search-inputs">
-          <el-input v-model="data.description" placeholder="请输入通知内容查询" class="search-input" />
+          <el-input v-model="data.username" placeholder="用户名" class="search-input" />
+          <el-input v-model="data.description" placeholder="通知内容" class="search-input" />
           <el-button type="primary" @click="load">查询</el-button>
           <el-button @click="reset">重置</el-button>
           <div class="action-buttons">
@@ -14,10 +14,9 @@
       </div>
     </div>
 
-    <!-- Table Section -->
     <div class="table-card">
       <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-        @selection-change="handleSelectionChange">
+                @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column prop="username" label="用户名">
           <template #default="scope">
@@ -62,14 +61,12 @@
         </el-table-column>
       </el-table>
 
-      <!-- Pagination -->
       <div class="pagination-wrapper" v-if="data.total">
         <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-          @current-change="load" background layout="total, prev, pager, next" />
+                       @current-change="load" background layout="total, prev, pager, next" />
       </div>
     </div>
 
-    <!-- Edit Dialog -->
     <el-dialog title="编辑通知" v-model="data.formVisible" width="40%" :close-on-click-modal="false" destroy-on-close>
       <el-form :model="data.form" label-width="80px" ref="formRef">
         <el-form-item label="通知内容" prop="description">
@@ -104,6 +101,7 @@ const data = reactive({
   pageSize: 10,
   loading: false,
   description: null,
+  username: null,
   formVisible: false,
   form: {},
   selectedIds: []
@@ -119,7 +117,8 @@ const load = async () => {
       params: {
         pageNum: data.pageNum,
         pageSize: data.pageSize,
-        description: data.description
+        description: data.description,
+        username: data.username
       }
     })
     data.tableData = res.data?.list || []
@@ -156,6 +155,7 @@ const save = async () => {
 // 重置搜索
 const reset = () => {
   data.description = null
+  data.username = null
   load()
 }
 

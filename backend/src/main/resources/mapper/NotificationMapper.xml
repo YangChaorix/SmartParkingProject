@@ -15,26 +15,29 @@
         WHERE id = #{id}
     </update>
     <select id="selectAll" resultType="com.example.entity.Notification">
-        select * from notification
+        SELECT n.*, u.username as username from notification n
+        left join user u on n.user_id = u.id
         <where>
             <if test="id != null">
-                and id = #{id}
+                and n.id = #{id}
             </if>
             <if test="userId != null">
-                and user_id = #{userId}
+                and n.user_id = #{userId}
             </if>
-            <!-- 模糊搜索 description 字段 -->
             <if test="description != null and description != ''">
-                and description like CONCAT('%', #{description}, '%')
+                and n.description like CONCAT('%', #{description}, '%')
+            </if>
+            <if test="username != null and username != ''">
+                and u.username like CONCAT('%', #{username}, '%')
             </if>
             <if test="isRead != null">
-                and is_read = #{isRead}
+                and n.is_read = #{isRead}
             </if>
             <if test="sendTime != null">
-                and send_time = #{sendTime}
+                and n.send_time = #{sendTime}
             </if>
             <if test="deleted != null">
-                and deleted = #{deleted}
+                and n.deleted = #{deleted}
             </if>
         </where>
     </select>
