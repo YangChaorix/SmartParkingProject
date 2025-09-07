@@ -1,7 +1,6 @@
 package com.example.service;
 
 import com.example.entity.Location;
-import com.example.entity.MapEntity;
 import com.example.entity.ParkingLot;
 import com.example.exception.CustomException;
 import com.example.mapper.LocationMapper;

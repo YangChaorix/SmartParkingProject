@@ -18,6 +18,7 @@
         <result column="district"          property="district"/>
         <result column="longitude"         property="longitude"/>
         <result column="latitude"          property="latitude"/>
+        <result column="pricing_rules"     property="pricingRules"/>
         <!-- 如果实体没有 createdAt/updatedAt 就不要映射它们 -->
         <!-- <result column="created_at"        property="createdAt"/>
         <result column="updated_at"        property="updatedAt"/> -->
@@ -28,7 +29,7 @@
         SELECT
         id, name, total, num,
         address, address_component, province, city, district,
-        longitude, latitude
+        longitude, latitude, pricing_rules
         FROM location
         <where>
             <if test="id != null"> AND id = #{id} </if>
@@ -49,7 +50,7 @@
         SELECT
             id, name, total, num,
             address, address_component, province, city, district,
-            longitude, latitude
+            longitude, latitude, pricing_rules
         FROM location
         WHERE id = #{id}
     </select>
@@ -74,6 +75,7 @@
             <if test="district != null">district,</if>
             <if test="longitude != null">longitude,</if>
             <if test="latitude != null">latitude,</if>
+            <if test="pricingRules != null">pricing_rules,</if>
             <!-- created_at/updated_at 让数据库默认填充即可 -->
         </trim>
         <trim prefix="VALUES (" suffix=")" suffixOverrides=",">
@@ -88,6 +90,7 @@
             <if test="district != null">#{district},</if>
             <if test="longitude != null">#{longitude},</if>
             <if test="latitude != null">#{latitude},</if>
+            <if test="pricingRules != null">#{pricingRules},</if>
         </trim>
     </insert>
 
@@ -106,6 +109,7 @@
             <if test="district != null">district = #{district},</if>
             <if test="longitude != null">longitude = #{longitude},</if>
             <if test="latitude != null">latitude = #{latitude},</if>
+            <if test="pricingRules != null">pricing_rules = #{pricingRules},</if>
         </set>
         WHERE id = #{id}
     </update>

@@ -27,6 +27,8 @@ public class Location {
     // 经度 / 纬度（DECIMAL(10,7) 建议用 BigDecimal）
     private BigDecimal longitude;
     private BigDecimal latitude;
+    // 计费规则
+    private String pricingRules;
 
     // 停车场列表（非表字段）
     private List<ParkingLot> parkingLots;
@@ -49,6 +51,10 @@ public class Location {
 
     public String getAddressComponent() { return addressComponent; }
     public void setAddressComponent(String addressComponent) { this.addressComponent = addressComponent; }
+
+
+    public String getPricingRules() { return pricingRules; }
+    public void setPricingRules(String pricingRules) { this.pricingRules = pricingRules; }
 
     public String getProvince() { return province; }
     public void setProvince(String province) { this.province = province; }
