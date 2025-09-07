@@ -3,7 +3,7 @@
     <div class="manager-header">
       <div class="manager-header-left">
         <img src="@/assets/imgs/logo.png" alt="">
-        <div class="title">停车场管理系统</div>
+        <div class="title">智慧停车系统</div>
       </div>
       <div class="manager-header-center">
         <el-breadcrumb separator-class="el-icon-arrow-right">
@@ -52,7 +52,7 @@
             </el-icon>
             <span>数据统计</span>
           </el-menu-item>
-          <el-menu-item index="/manager/map" v-if="data.user.role === 'ADMIN'">
+          <el-menu-item index="/manager/map">
             <el-icon>
               <Monitor />
             </el-icon>

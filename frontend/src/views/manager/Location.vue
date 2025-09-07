@@ -48,6 +48,7 @@
         <el-table-column label="操作" width="180" fixed="right" v-if="data.user.role === 'ADMIN'">
           <template #default="scope">
             <div class="action-buttons">
+              <el-button type="success" link @click="handlePricingRules(scope.row)">计费规则</el-button>
               <el-button type="primary" link @click="handleEdit(scope.row)">编辑</el-button>
               <el-button type="danger" link @click="del(scope.row.id)">删除</el-button>
             </div>
@@ -135,6 +136,44 @@
         </span>
       </template>
     </el-dialog>
+
+    <!-- 配置计费规则弹窗 -->
+    <el-dialog title="配置计费规则" v-model="data.pricingRulesVisible" width="40%" destroy-on-close>
+      <el-form :model="data.pricingRulesForm" label-width="120px">
+        <el-form-item label="免费停车时长">
+          <el-input v-model.number="data.pricingRulesForm.freeMinutes" placeholder="请输入免费停车时长">
+            <template #append>分钟</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="首段时长">
+          <el-input v-model.number="data.pricingRulesForm.firstTierMinutes" placeholder="请输入首段计费时长">
+            <template #append>分钟</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="首段价格">
+          <el-input v-model.number="data.pricingRulesForm.firstTierPrice" placeholder="请输入首段每分钟价格">
+            <template #append>元/分钟</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="后续价格">
+          <el-input v-model.number="data.pricingRulesForm.secondTierPrice" placeholder="请输入后续每分钟价格">
+            <template #append>元/分钟</template>
+          </el-input>
+        </el-form-item>
+        <el-form-item label="每日上限">
+          <el-input v-model.number="data.pricingRulesForm.dailyCap" placeholder="请输入每日收费上限">
+            <template #append>元</template>
+          </el-input>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="data.pricingRulesVisible = false">取消</el-button>
+          <el-button type="primary" @click="savePricingRules">保存</el-button>
+        </span>
+      </template>
+    </el-dialog>
+
   </div>
 </template>
 
@@ -252,6 +291,50 @@ const handleEdit = (row) => {
   data.formVisible = true
 }
 
+// 区域计费规则
+const handlePricingRules = (row) => {
+  const pricing = {
+    freeMinutes: 30,
+    firstTierMinutes: 120,
+    firstTierPrice: 0.08,
+    secondTierPrice: 0.05,
+    dailyCap: 50
+  };
+  data.form = JSON.parse(JSON.stringify(row));
+  if (data.form.pricingRules) {
+    try {
+      data.pricingRulesForm = JSON.parse(data.form.pricingRules);
+    } catch (e) {
+      console.error("Failed to parse pricingRules JSON:", e);
+      data.pricingRulesForm = pricing;
+    }
+  } else {
+    data.pricingRulesForm = pricing;
+  }
+  data.pricingRulesVisible = true;
+};
+
+// 更新计费规则
+const savePricingRules = async () => {
+  const updatedData = {
+    id: data.form.id, // 关键：只传入 id
+    pricingRules: JSON.stringify(data.pricingRulesForm) // 关键：只传入 pricingRules
+  };
+  try {
+    // 将精简后的对象发送给后端
+    const res = await request.put('/location/update', updatedData);
+    if (res.code === '200') {
+      ElMessage.success('计费规则保存成功');
+      data.pricingRulesVisible = false;
+      load(); // 刷新列表
+    } else {
+      ElMessage.error(res.msg);
+    }
+  } catch (error) {
+    ElMessage.error('保存失败');
+  }
+};
+
 const add = async () => {
   try {
     const res = await request.post('/location/add', data.form)
@@ -266,6 +349,7 @@ const add = async () => {
     ElMessage.error('新增失败')
   }
 }
+// 区域计费规则
 
 const update = async () => {
   try {

@@ -45,9 +45,10 @@
             <span class="table-cell-text">{{ scope.row.endTime }}</span>
           </template>
         </el-table-column>
-        <el-table-column prop="minutes" label="停车时间(分钟)">
+        <el-table-column prop="minutes" label="停车时间">
           <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.minutes }}</span>
+            <span class="table-cell-text">{{ scope.row.minutes }}分【{{ calculateDuration(scope.row.startTime, scope.row.endTime || new
+            Date()) }}】</span>
           </template>
         </el-table-column>
         <el-table-column prop="price" label="停车费用">
@@ -193,6 +194,26 @@ const reset = () => {
   data.vehicleName = null
   data.locationId = null
   load()
+}
+
+// 计算停车时长
+const calculateDuration = (startTime, endTime) => {
+  if (!startTime || !endTime) return '-'
+  const start = new Date(startTime)
+  const end = new Date(endTime)
+  const diff = end - start
+
+  // 计算天数、小时和分钟
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+
+  // 格式化输出
+  let duration = ''
+  if (days > 0) duration += `${days}天`
+  if (hours > 0) duration += `${hours}小时`
+  if (minutes > 0) duration += `${minutes}分钟`
+  return duration || '0分钟'
 }
 
 // 初始化加载
