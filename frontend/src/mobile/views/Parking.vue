@@ -19,12 +19,12 @@
               :title="`车牌号: ${item.vehicleName}`"
           >
             <template #tags>
-              <van-tag :type="item.status === 'PARKED' ? 'primary' : 'success'">
-                {{ item.status === 'PARKED' ? '停车中' : '已离场' }}
+              <van-tag :type="item.status === '已入场' ? 'primary' : 'success'">
+                {{ item.status === '已入场' ? '停车中' : '已离场' }}
               </van-tag>
             </template>
             <template #price>
-              <div v-if="item.status === 'COMPLETED'">费用: ¥{{ item.cost }}</div>
+              <div v-if="item.status === '已出场' && item.price != null">费用: ¥{{ item.price }}</div>
             </template>
             <template #num>
               <div>入场: {{ formatTime(item.startTime) }}</div>
@@ -51,20 +51,27 @@ const pageNum = ref(1);
 const user = JSON.parse(localStorage.getItem('user') || '{}');
 
 const loadParkingInfo = () => {
-  const status = activeTab.value === 0 ? 'PARKED' : 'COMPLETED';
-
+  const status = activeTab.value === 0 ? '已入场' : '已出场';
   $request.get('/parking/selectPage', {
     params: { pageNum: pageNum.value, pageSize: 10, userId: user.id, status: status }
   }).then(res => {
     if (res.code === '200') {
       if (refreshing.value) list.value = [];
-      list.value.push(...res.data.list);
+      const page = res.data || {};
+      const rows = page.list || [];
+      list.value.push(...rows);
       pageNum.value++;
-
       loading.value = false;
       refreshing.value = false;
-      if (res.data.total <= list.value.length) finished.value = true;
+      const total = page.total || 0;
+      if (total <= list.value.length) finished.value = true;
+    } else {
+      loading.value = false;
+      refreshing.value = false;
     }
+  }).catch(() => {
+    loading.value = false;
+    refreshing.value = false;
   });
 };
 
