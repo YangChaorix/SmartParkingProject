@@ -185,6 +185,22 @@ public class NotificationService {
     }
 
     /**
+     * 分页查询用户通知（按时间倒序，只查询未删除的通知）
+     * @param userId 用户ID
+     * @param pageNum 页码
+     * @param pageSize 每页数量
+     * @return 分页结果
+     */
+    public PageInfo<Notification> selectUserNotifications(Integer userId, Integer pageNum, Integer pageSize) {
+        PageInfo<Notification> page = PageHelper.startPage(pageNum, pageSize).doSelectPageInfo(() -> notificationMapper.selectUserNotifications(userId));
+        for (Notification n : page.getList()) {
+            User user = userMapper.selectById(n.getUserId());
+            n.setUsername(user.getUsername());
+        }
+        return page;
+    }
+
+    /**
      * 删除真实通知
      * @param id 通知ID
      */

@@ -13,6 +13,8 @@ public class Vehicle {
     private Integer userId;
     // 用户名称
     private String userName;
+    // 创建时间
+    private String createdAt;
 
     // 获取主键ID
     public Integer getId() {
@@ -52,5 +54,15 @@ public class Vehicle {
     // 设置用户名称
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    // 获取创建时间
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    // 设置创建时间
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
     }
 }

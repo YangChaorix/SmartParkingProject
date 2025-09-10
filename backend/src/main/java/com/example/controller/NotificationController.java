@@ -1,8 +1,10 @@
 package com.example.controller;
 
 import com.example.common.Result;
+import com.example.entity.Account;
 import com.example.entity.Notification;
 import com.example.service.NotificationService;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -91,6 +93,27 @@ public class NotificationController {
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
         PageInfo<Notification> page = notificationService.selectPage(notification, pageNum, pageSize);
+        return Result.success(page);
+    }
+
+    /**
+     * 用户分页查询通知消息（按时间倒序，只查询未删除的通知）
+     * 根据token自动解析用户ID，不需要前端传入userId和deleted参数
+     */
+    @GetMapping("/selectUserPage")
+    public Result selectUserPage(@RequestParam(defaultValue = "1") Integer pageNum,
+                                 @RequestParam(defaultValue = "10") Integer pageSize) {
+        // 从token中获取当前用户信息
+        Account currentUser = TokenUtils.getCurrentUser();
+        if (currentUser == null) {
+            return Result.error("用户未登录");
+        }
+        
+        // 获取用户ID
+        Integer userId = currentUser.getId();
+        
+        // 查询用户通知
+        PageInfo<Notification> page = notificationService.selectUserNotifications(userId, pageNum, pageSize);
         return Result.success(page);
     }
 

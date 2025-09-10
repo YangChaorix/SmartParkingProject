@@ -40,6 +40,15 @@
                 and n.deleted = #{deleted}
             </if>
         </where>
+        ORDER BY n.send_time DESC
+    </select>
+
+    <!-- 用户通知分页查询，按时间倒序，默认只查询未删除的通知 -->
+    <select id="selectUserNotifications" resultType="com.example.entity.Notification">
+        SELECT n.*, u.username as username from notification n
+        left join user u on n.user_id = u.id
+        WHERE n.user_id = #{userId} AND n.deleted = 0
+        ORDER BY n.send_time DESC
     </select>
 
 </mapper>

@@ -31,6 +31,10 @@ public class Pay {
     private Integer minutes;
     // 停车费用
     private Double price;
+    // 订单编号
+    private String serialNumber;
+    // 支付时间
+    private String payTime;
     // 支付状态
     private String status;
 
@@ -162,6 +166,26 @@ public class Pay {
     // 设置停车费用
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    // 获取订单编号
+    public String getSerialNumber() {
+        return serialNumber;
+    }
+
+    // 设置订单编号
+    public void setSerialNumber(String serialNumber) {
+        this.serialNumber = serialNumber;
+    }
+
+    // 获取支付时间
+    public String getPayTime() {
+        return payTime;
+    }
+
+    // 设置支付时间
+    public void setPayTime(String payTime) {
+        this.payTime = payTime;
     }
 
     // 获取支付状态

@@ -26,14 +26,35 @@ const form = reactive({
   username: user.username,
   password: '',
   newPassword: '',
-  confirmPassword: ''
+  confirmPassword: '',
+  role: user.role || 'USER' // 添加角色字段
 });
 
 const onSave = () => {
+  // 验证输入是否为空
+  if (!form.password || !form.newPassword || !form.confirmPassword) {
+    showFailToast('请填写完整信息');
+    return;
+  }
+  
+  // 验证新密码不能与原密码相同
+  if (form.password === form.newPassword) {
+    showFailToast('新密码不能与原密码相同');
+    return;
+  }
+  
+  // 验证两次输入的新密码是否一致
   if (form.newPassword !== form.confirmPassword) {
     showFailToast('两次输入的新密码不一致');
     return;
   }
+  
+  // 验证新密码长度
+  if (form.newPassword.length < 6) {
+    showFailToast('新密码长度不能少于6位');
+    return;
+  }
+  
   $request.put('/updatePassword', form).then(res => {
     if (res.code === '200') {
       showSuccessToast('修改成功，请重新登录');
@@ -41,7 +62,15 @@ const onSave = () => {
       localStorage.removeItem('user');
       router.push('/login');
     } else {
-      showFailToast(res.msg);
+      showFailToast(res.msg || '修改失败，请重试');
+    }
+  }).catch(error => {
+    console.error('修改密码失败:', error);
+    // 处理后端抛出的异常
+    if (error.response && error.response.data) {
+      showFailToast(error.response.data.msg || '修改失败，请重试');
+    } else {
+      showFailToast('修改失败，请重试');
     }
   });
 };

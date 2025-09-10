@@ -9,7 +9,7 @@
     <div className="content-wrapper">
       <div className="title">{{ notice.title }}</div>
       <div className="meta-info">
-        <span>发布人: {{ notice.user }}</span>
+        <!-- <span>发布人: {{ notice.user }}</span> -->
         <span>发布时间: {{ notice.time }}</span>
       </div>
       <van-divider/>

@@ -51,8 +51,8 @@ public class UserController {
      */
     @PutMapping("/update")
     public Result updateById(@RequestBody User user) {
-        userService.updateById(user);
-        return Result.success();
+        User updatedUser = userService.updateById(user);
+        return Result.success(updatedUser);
     }
 
     /**

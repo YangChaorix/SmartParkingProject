@@ -80,8 +80,17 @@ public class PayController {
     public Result selectPage(Pay pay,
                              @RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize) {
+        // 添加调试信息
+        System.out.println("=== PayController.selectPage 调试信息 ===");
+        System.out.println("接收到的Pay对象: " + pay);
+        System.out.println("Pay对象的status字段: " + pay.getStatus());
+        System.out.println("pageNum: " + pageNum);
+        System.out.println("pageSize: " + pageSize);
+        System.out.println("=== PayController.selectPage 调试信息结束 ===");
+        
         PageInfo<Pay> page = payService.selectPage(pay, pageNum, pageSize);
         return Result.success(page);
     }
+
 
 }

@@ -37,6 +37,11 @@ const routes = [
         name: 'MobileNoticeDetail',
         component: () => import('../views/NoticeDetail.vue')
     },
+    {
+        path: '/notification',
+        name: 'MobileNotification',
+        component: () => import('../views/Notification.vue')
+    },
     // 使用 TabBar 布局的主页面
     {
         path: '/',

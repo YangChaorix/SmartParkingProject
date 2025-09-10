@@ -6,6 +6,8 @@ import com.example.entity.Pay;
 import com.example.entity.User;
 import com.example.exception.CustomException;
 import com.example.mapper.PayMapper;
+import com.example.utils.DateTimeUtils;
+import com.example.utils.SerialNumberUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -32,6 +34,10 @@ public class PayService {
      * @param pay 停车费用实体
      */
     public void add(Pay pay) {
+        // 生成唯一订单编号
+        if (pay.getSerialNumber() == null || pay.getSerialNumber().isEmpty()) {
+            pay.setSerialNumber(SerialNumberUtils.generateSerialNumber());
+        }
         payMapper.insert(pay); // 插入数据库
     }
 
@@ -69,7 +75,9 @@ public class PayService {
         user.setAccount(user.getAccount() - pay.getPrice()); // 更新用户余额
         userService.updateById(user); // 更新用户信息
 
+        // 设置支付时间和状态
         pay.setStatus("已缴费"); // 更新缴费状态
+        pay.setPayTime(DateTimeUtils.getCurrentDateTime()); // 设置支付时间
         payMapper.updateById(pay); // 更新数据库
     }
 
@@ -110,5 +118,6 @@ public class PayService {
         List<Pay> list = this.selectAll(pay); // 查询所有操作
         return PageInfo.of(list); // 返回分页结果
     }
+
 
 }

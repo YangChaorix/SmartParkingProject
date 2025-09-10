@@ -10,7 +10,10 @@ const request = axios.create({
 // request 拦截器
 // 可以自请求发送前对请求做一些处理
 request.interceptors.request.use(config => {
-    config.headers['Content-Type'] = 'application/json;charset=utf-8';
+    // 只有在不是FormData时才设置Content-Type
+    if (!(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json;charset=utf-8';
+    }
     const user = JSON.parse(localStorage.getItem('xm-user') || '{}')
     config.headers['token'] = user.token || ''
     return config
@@ -38,10 +41,24 @@ request.interceptors.response.use(
         return res;
     },
         error => {
-        if (error.response.status === 404) {
-            ElMessage.error('未找到请求接口')
-        } else if (error.response.status === 500) {
-            ElMessage.error('系统异常，请查看后端控制台报错')
+        // 处理业务错误（如原密码错误等）
+        if (error.response && error.response.data) {
+            const res = error.response.data;
+            if (res.code && res.msg) {
+                // 业务错误，直接返回错误信息
+                return Promise.reject(error);
+            }
+        }
+        
+        // 处理HTTP状态码错误
+        if (error.response) {
+            if (error.response.status === 404) {
+                ElMessage.error('未找到请求接口')
+            } else if (error.response.status === 500) {
+                ElMessage.error('系统异常，请查看后端控制台报错')
+            } else {
+                console.error(error.message)
+            }
         } else {
             console.error(error.message)
         }

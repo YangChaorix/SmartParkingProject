@@ -6,7 +6,10 @@ const request = axios.create({
 })
 
 request.interceptors.request.use(config => {
-    config.headers['Content-Type'] = 'application/json;charset=utf-8';
+    // 只有在不是FormData时才设置Content-Type
+    if (!(config.data instanceof FormData)) {
+        config.headers['Content-Type'] = 'application/json;charset=utf-8';
+    }
     const raw = localStorage.getItem('user')
     let user = null
     try {

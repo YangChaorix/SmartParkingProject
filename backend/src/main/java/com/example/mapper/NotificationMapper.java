@@ -26,9 +26,11 @@ public interface NotificationMapper {
 
     List<Notification> selectAll(Notification notification);
 
+    List<Notification> selectUserNotifications(Integer userId);
+
     @Delete("DELETE FROM notification WHERE id = #{id}")
     void deleteReal(Integer id);
 
-    @Select("SELECT COUNT(*) FROM notification WHERE user_id = #{userId} AND is_read = 0")
+    @Select("SELECT COUNT(*) FROM notification WHERE user_id = #{userId} AND is_read = 0 AND deleted = 0")
     Integer selectUnreadCount(Integer userId);
 }

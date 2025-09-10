@@ -70,9 +70,21 @@ public class UserService {
     /**
      * 更新用户信息。
      * @param user 用户实体
+     * @return 更新后的用户实体（包含新生成的token）
      */
-    public void updateById(User user) {
+    public User updateById(User user) {
         userMapper.updateById(user); // 更新操作
+        
+        // 更新成功后，重新查询用户信息并生成新的token
+        User updatedUser = userMapper.selectById(user.getId());
+        if (updatedUser != null) {
+            // 生成新的token
+            String tokenData = updatedUser.getId() + "-" + RoleEnum.USER.name();
+            String token = TokenUtils.createToken(tokenData, updatedUser.getPassword());
+            updatedUser.setToken(token); // 设置token
+        }
+        
+        return updatedUser; // 返回包含token的完整用户信息
     }
 
     /**

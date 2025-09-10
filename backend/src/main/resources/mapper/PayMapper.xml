@@ -22,7 +22,16 @@
             <if test="parkingLotName != null"> and parking_lot.name like concat('%', #{parkingLotName}, '%')</if>
             <if test="startTime != null"> and pay.start_time like concat('%', #{startTime}, '%')</if>
             <if test="endTime != null"> and pay.end_time like concat('%', #{endTime}, '%')</if>
-            <if test="status != null"> and pay.status like concat('%', #{status}, '%')</if>
+            <if test="status != null and status != ''"> and pay.status = #{status}</if>
+            <if test="serialNumber != null and vehicleName != null">
+                and (pay.serial_number like concat('%', #{serialNumber}, '%') or vehicle.name like concat('%', #{vehicleName}, '%'))
+            </if>
+            <if test="serialNumber != null and vehicleName == null">
+                and pay.serial_number like concat('%', #{serialNumber}, '%')
+            </if>
+            <if test="serialNumber == null and vehicleName != null">
+                and vehicle.name like concat('%', #{vehicleName}, '%')
+            </if>
         </where>
         order by id desc
     </select>
@@ -49,6 +58,8 @@
             <if test="endTime != null">end_time,</if>
             <if test="minutes != null">minutes,</if>
             <if test="price != null">price,</if>
+            <if test="serialNumber != null">serial_number,</if>
+            <if test="payTime != null">pay_time,</if>
             <if test="status != null">status,</if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
@@ -61,6 +72,8 @@
             <if test="endTime != null">#{endTime},</if>
             <if test="minutes != null">#{minutes},</if>
             <if test="price != null">#{price},</if>
+            <if test="serialNumber != null">#{serialNumber},</if>
+            <if test="payTime != null">#{payTime},</if>
             <if test="status != null">#{status},</if>
         </trim>
     </insert>
@@ -91,6 +104,12 @@
             </if>
             <if test="price != null">
                 price = #{price},
+            </if>
+            <if test="serialNumber != null">
+                serial_number = #{serialNumber},
+            </if>
+            <if test="payTime != null">
+                pay_time = #{payTime},
             </if>
             <if test="status != null">
                 status = #{status},

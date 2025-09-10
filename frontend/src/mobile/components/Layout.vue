@@ -13,13 +13,35 @@
       <van-tabbar-item replace to="/home" icon="home-o">首页</van-tabbar-item>
       <van-tabbar-item replace to="/parking" icon="records-o">停车</van-tabbar-item>
       <van-tabbar-item replace to="/pay" icon="bill-o">缴费</van-tabbar-item>
-      <van-tabbar-item replace to="/me" icon="user-o">我的</van-tabbar-item>
+      <van-tabbar-item replace to="/me" icon="user-o" :badge="unreadCount > 0 ? unreadCount : ''">我的</van-tabbar-item>
     </van-tabbar>
   </div>
 </template>
 
 <script setup>
-// 该组件作为布局，通常不需要复杂的脚本逻辑
+import { ref, onMounted, inject } from 'vue';
+
+const $request = inject('$request');
+const unreadCount = ref(0);
+
+// 获取未读通知数量
+const getUnreadCount = async () => {
+  try {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user && user.id) {
+      const res = await $request.get(`/notification/selectUnreadCount/${user.id}`);
+      if (res && res.code === '200') {
+        unreadCount.value = res.data || 0;
+      }
+    }
+  } catch (error) {
+    console.error('获取未读通知数量失败:', error);
+  }
+};
+
+onMounted(() => {
+  getUnreadCount();
+});
 </script>
 
 <style>
