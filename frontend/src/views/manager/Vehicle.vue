@@ -17,37 +17,53 @@
 
     <!-- Table Section -->
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="name" label="车牌号">
-          <template #default="scope">
-            <span class="plate-text">{{ scope.row.name }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="userName" label="所属用户">
-          <template #default="scope">
-            <span class="user-text">{{ scope.row.userName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button type="primary" link @click="handleEdit(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" link @click="del(scope.row.id)">
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          @selection-change="handleSelectionChange"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="name" label="车牌号" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="plate-text">{{ scope.row.name }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="userName" label="所属用户" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="user-text">{{ scope.row.userName }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200">
+            <template #default="scope">
+              <div class="operation-buttons">
+                <el-button type="primary" link size="small" @click="handleEdit(scope.row)">
+                  编辑
+                </el-button>
+                <el-button type="danger" link size="small" @click="del(scope.row.id)">
+                  删除
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <!-- Pagination -->
       <div class="pagination-wrapper" v-if="data.total">
-        <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-          @current-change="load" background layout="total, prev, pager, next" />
+        <el-pagination 
+          v-model:current-page="data.pageNum" 
+          :page-size="data.pageSize" 
+          :total="data.total"
+          @current-change="load" 
+          background 
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[5, 10, 20, 50]"
+        />
       </div>
     </div>
 
@@ -254,124 +270,70 @@ load()
 </script>
 
 <style scoped>
+@import '@/assets/css/responsive-table.css';
+
 .parking-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  @apply responsive-container;
 }
 
-.search-card,
-.table-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.search-card:hover,
-.table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+.search-card {
+  @apply search-card;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
+  @apply search-wrapper;
 }
 
 .search-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  @apply search-inputs;
 }
 
 .search-input {
-  width: 240px;
+  @apply search-input;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  @apply action-buttons;
 }
 
 .table-card {
-  position: relative;
-  padding-bottom: 60px;
+  @apply table-card;
+}
+
+.table-container {
+  @apply table-container;
 }
 
 .custom-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
+  @apply custom-table;
 }
 
-.plate-text {
-  font-size: 14px;
-  color: #409EFF;
-  font-weight: 500;
+.operation-buttons {
+  @apply operation-buttons;
 }
 
-.user-text {
-  font-size: 14px;
-  color: #606266;
+.pagination-wrapper {
+  @apply pagination-wrapper;
 }
 
 .custom-dialog {
-  border-radius: 16px;
+  @apply custom-dialog;
 }
 
 .vehicle-form {
-  padding: 20px;
+  @apply custom-form;
 }
 
 .custom-input,
 .custom-select {
-  width: 100%;
+  @apply custom-input;
 }
 
-.el-button {
-  border-radius: 8px;
-  transition: all 0.3s ease;
+.plate-text {
+  @apply plate-text;
 }
 
-.el-button:hover {
-  transform: translateY(-1px);
-}
-
-.pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-}
-
-/* Animation classes */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.table-card {
-  animation: slideIn 0.4s ease;
+.user-text {
+  @apply user-text;
 }
 </style>

@@ -5,26 +5,39 @@
 <mapper namespace="com.example.mapper.VehicleMapper">
 
     <select id="selectAll" resultType="com.example.entity.Vehicle">
-        select vehicle.*, user.name as userName, DATE_FORMAT(vehicle.created_at, '%Y-%m-%d %H:%i:%s') as createdAt from vehicle
+        select vehicle.*, user.name as userName, 
+               DATE_FORMAT(vehicle.created_at, '%Y-%m-%d %H:%i:%s') as createdAt,
+               DATE_FORMAT(vehicle.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from vehicle
         left join user on vehicle.user_id = user.id
         <where>
             <if test="id != null"> and vehicle.id = #{id}</if>
             <if test="name != null"> and vehicle.name like concat('%', #{name}, '%')</if>
             <if test="userId != null"> and vehicle.user_id = #{userId}</if>
             <if test="userName != null"> and user.name like concat('%', #{userName}, '%')</if>
+            and vehicle.deleted_at is null
         </where>
         order by id desc
     </select>
 
     <select id="selectById" resultType="com.example.entity.Vehicle">
-        select * from `vehicle`
-        where id = #{id}
+        select vehicle.*, 
+               DATE_FORMAT(vehicle.created_at, '%Y-%m-%d %H:%i:%s') as createdAt,
+               DATE_FORMAT(vehicle.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from `vehicle`
+        where id = #{id} and deleted_at is null
     </select>
 
     <delete id="deleteById">
         delete from `vehicle`
         where id = #{id}
     </delete>
+
+    <update id="softDeleteById">
+        update `vehicle` 
+        set deleted_at = NOW()
+        where id = #{id}
+    </update>
 
     <insert id="insert" parameterType="com.example.entity.Vehicle" useGeneratedKeys="true" keyProperty="id">
         insert into `vehicle`

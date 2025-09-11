@@ -43,8 +43,11 @@
         is-link 
         :to="'/notification'"
       >
-        <template #right-icon>
-          <van-icon name="arrow" />
+        <template #title>
+          <div class="notification-title">
+            <span>我的通知</span>
+            <van-badge v-if="unreadCount > 0" :content="unreadCount" color="#ff4d4f" class="notification-badge" position="static" />
+          </div>
         </template>
       </van-cell>
     </van-cell-group>
@@ -94,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from 'vue';
+import { ref, onMounted, onActivated, inject } from 'vue';
 import { useRouter } from 'vue-router';
 import { showSuccessToast, showFailToast, showConfirmDialog } from 'vant';
 
@@ -104,6 +107,7 @@ const user = ref(JSON.parse(localStorage.getItem('user') || '{}'));
 const showRecharge = ref(false);
 const rechargeAmount = ref('');
 const selectedPaymentMethod = ref('');
+const unreadCount = ref(0);
 
 const logout = () => {
   showConfirmDialog({ title: '提示', message: '您确定要退出登录吗？' })
@@ -173,6 +177,20 @@ const selectPaymentMethod = (method) => {
   selectedPaymentMethod.value = method;
 };
 
+// 获取未读通知数量
+const getUnreadCount = async () => {
+  try {
+    if (user.value && user.value.id) {
+      const res = await $request.get(`/notification/selectUnreadCount/${user.value.id}`);
+      if (res && res.code === '200') {
+        unreadCount.value = res.data || 0;
+      }
+    }
+  } catch (error) {
+    console.error('获取未读通知数量失败:', error);
+  }
+};
+
 const handleRecharge = () => {
   if(!rechargeAmount.value || rechargeAmount.value <= 0) {
     showFailToast('请输入正确的充值金额');
@@ -221,6 +239,14 @@ onMounted(() => {
     console.error('获取用户信息失败:', error);
     showFailToast('获取用户信息失败');
   });
+  
+  // 获取未读通知数量
+  getUnreadCount();
+});
+
+// 页面激活时刷新未读通知数量
+onActivated(() => {
+  getUnreadCount();
 });
 </script>
 
@@ -373,6 +399,14 @@ onMounted(() => {
   width: 100%;
 }
 
+.notification-badge {
+  margin-left: 8px;
+  position: static !important;
+  transform: none !important;
+  top: auto !important;
+  right: auto !important;
+}
+
 .unread-count-tag {
   margin-left: 8px;
   font-size: 11px;
@@ -392,5 +426,6 @@ onMounted(() => {
     margin: 10px;
     padding: 15px;
   }
+  
 }
 </style>

@@ -10,7 +10,7 @@
             <if test="description != null">description = #{description},</if>
             <if test="isRead != null">is_read = #{isRead},</if>
             <if test="sendTime != null">send_time = #{sendTime},</if>
-            <if test="deleted != null">deleted = #{deleted}</if>
+            <if test="deletedAt != null">deleted_at = #{deletedAt}</if>
         </set>
         WHERE id = #{id}
     </update>
@@ -36,18 +36,24 @@
             <if test="sendTime != null">
                 and n.send_time = #{sendTime}
             </if>
-            <if test="deleted != null">
-                and n.deleted = #{deleted}
+            <if test="deletedAt != null">
+                and n.deleted_at = #{deletedAt}
             </if>
         </where>
         ORDER BY n.send_time DESC
     </select>
 
+    <update id="softDeleteById">
+        UPDATE notification 
+        SET deleted_at = NOW()
+        WHERE id = #{id}
+    </update>
+
     <!-- 用户通知分页查询，按时间倒序，默认只查询未删除的通知 -->
     <select id="selectUserNotifications" resultType="com.example.entity.Notification">
         SELECT n.*, u.username as username from notification n
         left join user u on n.user_id = u.id
-        WHERE n.user_id = #{userId} AND n.deleted = 0
+        WHERE n.user_id = #{userId} AND n.deleted_at IS NULL
         ORDER BY n.send_time DESC
     </select>
 

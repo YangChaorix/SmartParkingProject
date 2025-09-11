@@ -15,6 +15,8 @@ public class ParkingLot {
     private String status;
     // 区域名称
     private String locationName;
+    // 删除时间
+    private String deletedAt;
 
     // 获取主键ID
     public Integer getId() {
@@ -64,5 +66,15 @@ public class ParkingLot {
     // 设置车位状态
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    // 获取删除时间
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    // 设置删除时间
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

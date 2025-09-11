@@ -5,7 +5,9 @@
 <mapper namespace="com.example.mapper.UserMapper">
 
     <select id="selectAll" resultType="com.example.entity.User">
-        select user.* from user
+        select user.*,
+               DATE_FORMAT(user.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from user
         <where>
             <if test="id != null"> and user.id = #{id}</if>
             <if test="username != null"> and user.username like concat('%', #{username}, '%')</if>
@@ -15,19 +17,28 @@
             <if test="role != null"> and user.role like concat('%', #{role}, '%')</if>
             <if test="phone != null"> and user.phone like concat('%', #{phone}, '%')</if>
             <if test="email != null"> and user.email like concat('%', #{email}, '%')</if>
+            and user.deleted_at is null
         </where>
         order by id desc
     </select>
 
     <select id="selectById" resultType="com.example.entity.User">
-        select * from `user`
-        where id = #{id}
+        select user.*,
+               DATE_FORMAT(user.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from `user`
+        where id = #{id} and deleted_at is null
     </select>
 
     <delete id="deleteById">
         delete from `user`
         where id = #{id}
     </delete>
+
+    <update id="softDeleteById">
+        update `user` 
+        set deleted_at = NOW()
+        where id = #{id}
+    </update>
 
     <insert id="insert" parameterType="com.example.entity.User" useGeneratedKeys="true" keyProperty="id">
         insert into `user`

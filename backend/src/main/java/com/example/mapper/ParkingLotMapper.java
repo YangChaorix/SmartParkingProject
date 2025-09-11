@@ -20,6 +20,11 @@ public interface ParkingLotMapper {
     int deleteById(Integer id);
 
     /**
+     * 软删除
+     */
+    int softDeleteById(Integer id);
+
+    /**
      * 修改
      */
     int updateById(ParkingLot parkingLot);

@@ -17,54 +17,96 @@
 
     <!-- Table Section -->
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="title" label="标题">
-          <template #default="scope">
-            <span class="title-text">{{ scope.row.title }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="content" label="内容">
-          <template #default="scope">
-            <span class="content-text">{{ scope.row.content }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="time" label="发布时间">
-          <template #default="scope">
-            <span class="time-text">{{ scope.row.time }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button type="primary" link @click="handleEdit(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" link @click="del(scope.row.id)">
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          @selection-change="handleSelectionChange"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="title" label="标题" min-width="200" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="title-text">{{ scope.row.title }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="content" label="内容" min-width="300" show-overflow-tooltip>
+            <template #default="scope">
+              <div class="notice-content">
+                <span class="content-text">{{ scope.row.content }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="time" label="发布时间" min-width="160" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="time-text">{{ scope.row.time }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200">
+            <template #default="scope">
+              <div class="operation-buttons">
+                <el-button type="primary" link size="small" @click="handleEdit(scope.row)">
+                  编辑
+                </el-button>
+                <el-button type="danger" link size="small" @click="del(scope.row.id)">
+                  删除
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <!-- Pagination -->
       <div class="pagination-wrapper" v-if="data.total">
-        <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-          @current-change="load" background layout="total, prev, pager, next" />
+        <el-pagination 
+          v-model:current-page="data.pageNum" 
+          :page-size="data.pageSize" 
+          :total="data.total"
+          @current-change="load" 
+          background 
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[5, 10, 20, 50]"
+        />
       </div>
     </div>
 
     <!-- Dialog -->
-    <el-dialog :title="data.form.id ? '编辑公告' : '新增公告'" v-model="data.formVisible" width="40%"
-      :close-on-click-modal="false" destroy-on-close class="custom-dialog">
+    <el-dialog 
+      :title="data.form.id ? '编辑公告' : '新增公告'" 
+      v-model="data.formVisible" 
+      :width="dialogWidth"
+      :close-on-click-modal="false" 
+      destroy-on-close 
+      class="custom-dialog"
+    >
       <el-form :model="data.form" label-width="80px" class="notice-form" ref="formRef">
         <el-form-item label="标题" prop="title">
           <el-input v-model="data.form.title" placeholder="请输入标题" class="custom-input" />
         </el-form-item>
         <el-form-item label="内容" prop="content">
-          <el-input type="textarea" v-model="data.form.content" placeholder="请输入内容" class="custom-input" :rows="4" />
+          <el-input 
+            type="textarea" 
+            v-model="data.form.content" 
+            placeholder="请输入内容" 
+            class="custom-textarea" 
+            :rows="4"
+            resize="vertical"
+          />
+        </el-form-item>
+        <el-form-item label="发布时间" prop="time">
+          <el-date-picker
+            v-model="data.form.time"
+            type="datetime"
+            placeholder="请选择发布时间"
+            format="YYYY-MM-DD HH:mm:ss"
+            value-format="YYYY-MM-DD HH:mm:ss"
+            class="custom-date-picker"
+            style="width: 100%"
+          />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -78,7 +120,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue"
+import { reactive, ref, computed } from "vue"
 import request from "@/utils/request"
 import { ElMessage, ElMessageBox } from "element-plus"
 
@@ -96,6 +138,13 @@ const data = reactive({
 })
 
 const formRef = ref()
+
+// 响应式对话框宽度
+const dialogWidth = computed(() => {
+  if (window.innerWidth <= 480) return '95%'
+  if (window.innerWidth <= 768) return '80%'
+  return '40%'
+})
 
 // 加载表格数据
 const load = async () => {
@@ -119,7 +168,17 @@ const load = async () => {
 
 // 打开新增弹窗
 const handleAdd = () => {
-  data.form = {}
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  
+  data.form = {
+    time: `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+  }
   data.formVisible = true
 }
 
@@ -227,59 +286,50 @@ load()
 </script>
 
 <style scoped>
+@import '@/assets/css/responsive-table.css';
+
 .notice-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  @apply responsive-container;
 }
 
-.search-card,
-.table-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.search-card:hover,
-.table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+.search-card {
+  @apply search-card;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
+  @apply search-wrapper;
 }
 
 .search-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  @apply search-inputs;
 }
 
 .search-input {
-  width: 240px;
+  @apply search-input;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  @apply action-buttons;
 }
 
 .table-card {
-  position: relative;
-  padding-bottom: 60px;
+  @apply table-card;
+}
+
+.table-container {
+  @apply table-container;
 }
 
 .custom-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
+  @apply custom-table;
+}
+
+.operation-buttons {
+  @apply operation-buttons;
+}
+
+.pagination-wrapper {
+  @apply pagination-wrapper;
 }
 
 .title-text {
@@ -288,72 +338,79 @@ load()
   font-weight: 500;
 }
 
-.content-text {
-  font-size: 14px;
-  color: #606266;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
 .time-text {
   font-size: 14px;
   color: #909399;
 }
 
+/* 公告内容特殊样式 */
+.notice-content {
+  max-width: 300px;
+  word-wrap: break-word;
+  word-break: break-all;
+  line-height: 1.4;
+  padding: 4px 0;
+}
+
+.content-text {
+  font-size: 14px;
+  color: #606266;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.2em; /* 3行的高度 */
+}
+
+/* 对话框样式 */
 .custom-dialog {
-  border-radius: 16px;
+  @apply custom-dialog;
 }
 
 .notice-form {
-  padding: 20px;
+  @apply custom-form;
 }
 
 .custom-input {
+  @apply custom-input;
+}
+
+.custom-textarea {
   width: 100%;
 }
 
-.el-button {
-  border-radius: 8px;
-  transition: all 0.3s ease;
+.custom-date-picker {
+  width: 100%;
 }
 
-.el-button:hover {
-  transform: translateY(-1px);
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 0;
 }
 
-.pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-}
-
-/* Animation classes */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .notice-content {
+    max-width: 200px;
   }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
+  
+  .content-text {
+    -webkit-line-clamp: 2;
+    max-height: 2.8em;
   }
 }
 
-.table-card {
-  animation: slideIn 0.4s ease;
+@media (max-width: 480px) {
+  .notice-content {
+    max-width: 150px;
+  }
+  
+  .content-text {
+    -webkit-line-clamp: 1;
+    max-height: 1.4em;
+  }
 }
 </style>

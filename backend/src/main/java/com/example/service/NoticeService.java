@@ -24,25 +24,28 @@ public class NoticeService {
      * @param notice 公告实体
      */
     public void add(Notice notice) {
-        notice.setTime(DateUtil.now()); // 设置当前时间为公告时间
+        // 如果前端没有传递时间，则设置为当前时间
+        if (notice.getTime() == null || notice.getTime().trim().isEmpty()) {
+            notice.setTime(DateUtil.now());
+        }
         noticeMapper.insert(notice); // 插入数据库
     }
 
     /**
-     * 根据ID删除公告。
+     * 根据ID删除公告（软删除）。
      * @param id 公告ID
      */
     public void deleteById(Integer id) {
-        noticeMapper.deleteById(id); // 删除操作
+        noticeMapper.softDeleteById(id); // 软删除操作
     }
 
     /**
-     * 批量删除公告。
+     * 批量删除公告（软删除）。
      * @param ids 公告ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            noticeMapper.deleteById(id); // 批量删除操作
+            noticeMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 
@@ -51,7 +54,10 @@ public class NoticeService {
      * @param notice 公告实体
      */
     public void updateById(Notice notice) {
-        notice.setTime(DateUtil.now()); // 更新时间为当前时间
+        // 如果前端没有传递时间，则设置为当前时间
+        if (notice.getTime() == null || notice.getTime().trim().isEmpty()) {
+            notice.setTime(DateUtil.now());
+        }
         noticeMapper.updateById(notice); // 更新操作
     }
 

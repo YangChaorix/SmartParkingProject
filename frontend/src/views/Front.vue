@@ -22,7 +22,8 @@
         <div v-else>
           <el-dropdown>
             <div class="front-header-dropdown">
-              <img :src="data.user.avatar" alt="">
+              <img v-if="data.user.avatar" :src="getAvatarUrl(data.user.avatar)" alt="">
+              <img v-else :src="getDefaultAvatar()" alt="">
               <div style="margin-left: 10px">
                 <span>{{ data.user.name }}</span><el-icon><arrow-down /></el-icon>
               </div>
@@ -54,6 +55,25 @@ const data = reactive({
 
 const updateUser = () => {
   data.user = JSON.parse(localStorage.getItem('xm-user') || '{}')   // 重新获取下用户的最新信息
+}
+
+// 获取头像URL，确保路径正确
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return getDefaultAvatar()
+  
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+  
+  // 如果是相对路径，添加基础URL
+  const baseUrl = import.meta.env.VITE_BASE_URL || ''
+  return baseUrl + avatar
+}
+
+// 获取默认头像
+const getDefaultAvatar = () => {
+  return new URL('/src/assets/imgs/avatar.png', import.meta.url).href
 }
 
 // 退出登录

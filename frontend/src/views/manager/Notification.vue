@@ -15,65 +15,97 @@
     </div>
 
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-                @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="username" label="用户名">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.username }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="description" label="通知内容">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.description }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="isRead" label="阅读状态">
-          <template #default="scope">
-            <el-tag :type="scope.row.isRead === 1 ? 'success' : 'warning'" effect="light">
-              {{ scope.row.isRead === 1 ? '已读' : '未读' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="deleted" label="用户删除状态">
-          <template #default="scope">
-            <el-tag :type="scope.row.deleted === 1 ? 'danger' : 'success'" effect="light">
-              {{ scope.row.deleted === 1 ? '已删除' : '正常' }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="sendTime" label="发送时间">
-          <template #default="scope">
-            <span class="table-cell-text">{{ formatDateTime(scope.row.sendTime) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="scope">
-            <div class="operation-buttons">
-              <el-button type="primary" link @click="handleEdit(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" link @click="handleDelete(scope.row.id)">
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          @selection-change="handleSelectionChange"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="username" label="用户名" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="username-text">{{ scope.row.username }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="description" label="通知内容" min-width="300" show-overflow-tooltip>
+            <template #default="scope">
+              <div class="notification-content">
+                <span class="table-cell-text">{{ scope.row.description }}</span>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="isRead" label="阅读状态" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.isRead === 1 ? 'success' : 'warning'" effect="light">
+                {{ scope.row.isRead === 1 ? '已读' : '未读' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="deletedAt" label="删除状态" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.deletedAt ? 'danger' : 'success'" effect="light">
+                {{ scope.row.deletedAt ? '已删除' : '正常' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="sendTime" label="发送时间" min-width="160" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ formatDateTime(scope.row.sendTime) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200">
+            <template #default="scope">
+              <div class="operation-buttons">
+                <el-button type="primary" link size="small" @click="handleEdit(scope.row)">
+                  编辑
+                </el-button>
+                <el-button type="danger" link size="small" @click="handleDelete(scope.row.id)">
+                  删除
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <div class="pagination-wrapper" v-if="data.total">
-        <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-                       @current-change="load" background layout="total, prev, pager, next" />
+        <el-pagination 
+          v-model:current-page="data.pageNum" 
+          :page-size="data.pageSize" 
+          :total="data.total"
+          @current-change="load" 
+          background 
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[10, 20, 50, 100]"
+        />
       </div>
     </div>
 
-    <el-dialog title="编辑通知" v-model="data.formVisible" width="40%" :close-on-click-modal="false" destroy-on-close>
-      <el-form :model="data.form" label-width="80px" ref="formRef">
+    <el-dialog 
+      title="编辑通知" 
+      v-model="data.formVisible" 
+      :width="dialogWidth" 
+      :close-on-click-modal="false" 
+      destroy-on-close
+      class="custom-dialog"
+    >
+      <el-form :model="data.form" label-width="80px" ref="formRef" class="notification-form">
         <el-form-item label="通知内容" prop="description">
-          <el-input v-model="data.form.description" type="textarea" :rows="4" placeholder="请输入通知内容" />
+          <el-input 
+            v-model="data.form.description" 
+            type="textarea" 
+            :rows="4" 
+            placeholder="请输入通知内容"
+            class="custom-textarea"
+            resize="vertical"
+          />
         </el-form-item>
         <el-form-item label="状态" prop="isRead">
-          <el-select v-model="data.form.isRead" placeholder="请选择状态">
+          <el-select v-model="data.form.isRead" placeholder="请选择状态" class="custom-select">
             <el-option label="未读" :value="0" />
             <el-option label="已读" :value="1" />
           </el-select>
@@ -90,7 +122,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue"
+import { reactive, ref, computed } from "vue"
 import request from "@/utils/request"
 import { ElMessage, ElMessageBox } from "element-plus"
 
@@ -108,6 +140,13 @@ const data = reactive({
 })
 
 const formRef = ref()
+
+// 响应式对话框宽度
+const dialogWidth = computed(() => {
+  if (window.innerWidth <= 480) return '95%'
+  if (window.innerWidth <= 768) return '80%'
+  return '40%'
+})
 
 // 加载表格数据
 const load = async () => {
@@ -223,105 +262,122 @@ load()
 </script>
 
 <style scoped>
+@import '@/assets/css/responsive-table.css';
+
 .notification-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  @apply responsive-container;
 }
 
-.search-card,
-.table-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.search-card:hover,
-.table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+.search-card {
+  @apply search-card;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
+  @apply search-wrapper;
 }
 
 .search-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  @apply search-inputs;
 }
 
 .search-input {
-  width: 240px;
+  @apply search-input;
 }
 
-.custom-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.table-cell-text {
-  font-size: 14px;
-  color: #606266;
-}
-
-.el-button {
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.el-button:hover {
-  transform: translateY(-1px);
-}
-
-.el-tag {
-  border-radius: 6px;
-  padding: 4px 8px;
+.action-buttons {
+  @apply action-buttons;
 }
 
 .table-card {
-  position: relative;
-  padding-bottom: 60px;
+  @apply table-card;
 }
 
-.pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
+.table-container {
+  @apply table-container;
+}
+
+.custom-table {
+  @apply custom-table;
+}
+
+.table-cell-text {
+  @apply table-cell-text;
 }
 
 .operation-buttons {
+  @apply operation-buttons;
+}
+
+.pagination-wrapper {
+  @apply pagination-wrapper;
+}
+
+.username-text {
+  @apply username-text;
+}
+
+/* 通知内容特殊样式 */
+.notification-content {
+  max-width: 300px;
+  word-wrap: break-word;
+  word-break: break-all;
+  line-height: 1.4;
+  padding: 4px 0;
+}
+
+.notification-content .table-cell-text {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.2em; /* 3行的高度 */
+}
+
+/* 对话框样式 */
+.custom-dialog {
+  @apply custom-dialog;
+}
+
+.notification-form {
+  @apply custom-form;
+}
+
+.custom-textarea {
+  width: 100%;
+}
+
+.custom-select {
+  @apply custom-input;
+}
+
+.dialog-footer {
   display: flex;
-  gap: 8px;
-  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 0;
 }
 
-/* Animation classes */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
+/* 响应式优化 */
+@media (max-width: 768px) {
+  .notification-content {
+    max-width: 200px;
   }
+  
+  .notification-content .table-cell-text {
+    -webkit-line-clamp: 2;
+    max-height: 2.8em;
+  }
+}
 
-  to {
-    transform: translateY(0);
-    opacity: 1;
+@media (max-width: 480px) {
+  .notification-content {
+    max-width: 150px;
+  }
+  
+  .notification-content .table-cell-text {
+    -webkit-line-clamp: 1;
+    max-height: 1.4em;
   }
 }
 </style>

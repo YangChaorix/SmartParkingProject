@@ -47,20 +47,20 @@ public class AdminService {
     }
 
     /**
-     * 根据ID删除管理员。
+     * 根据ID删除管理员（软删除）。
      * @param id 管理员ID
      */
     public void deleteById(Integer id) {
-        adminMapper.deleteById(id); // 删除操作
+        adminMapper.softDeleteById(id); // 软删除操作
     }
 
     /**
-     * 批量删除管理员。
+     * 批量删除管理员（软删除）。
      * @param ids 管理员ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            adminMapper.deleteById(id); // 批量删除操作
+            adminMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 

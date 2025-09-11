@@ -88,7 +88,7 @@ const load = async () => {
         pageNum: data.pageNum,
         pageSize: data.pageSize,
         userId: data.userId,
-        deleted: 0
+        deletedAt: null
       }
     })
     data.tableData = res.data?.list || []

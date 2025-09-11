@@ -88,9 +88,18 @@ public class FileController {
 
                 // 从路径中提取原始文件名，用于下载时显示
                 String fileName = filePathSuffix.substring(filePathSuffix.lastIndexOf("/") + 1);
-
-                response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
-                response.setContentType("application/octet-stream");
+                
+                // 根据文件扩展名设置正确的Content-Type
+                String contentType = getContentType(fileName);
+                response.setContentType(contentType);
+                
+                // 如果是图片文件，设置为内联显示而不是下载
+                if (isImageFile(fileName)) {
+                    response.addHeader("Content-Disposition", "inline;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+                } else {
+                    response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(fileName, StandardCharsets.UTF_8));
+                }
+                
                 byte[] bytes = FileUtil.readBytes(realFilePath);
                 os = response.getOutputStream();
                 os.write(bytes);
@@ -100,6 +109,52 @@ public class FileController {
         } catch (Exception e) {
             log.warn("文件下载失败：" + filePathSuffix);
         }
+    }
+    
+    /**
+     * 根据文件名获取Content-Type
+     */
+    private String getContentType(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        switch (extension) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "bmp":
+                return "image/bmp";
+            case "webp":
+                return "image/webp";
+            case "svg":
+                return "image/svg+xml";
+            case "pdf":
+                return "application/pdf";
+            case "txt":
+                return "text/plain";
+            case "html":
+                return "text/html";
+            case "css":
+                return "text/css";
+            case "js":
+                return "application/javascript";
+            case "json":
+                return "application/json";
+            case "xml":
+                return "application/xml";
+            default:
+                return "application/octet-stream";
+        }
+    }
+    
+    /**
+     * 判断是否为图片文件
+     */
+    private boolean isImageFile(String fileName) {
+        String extension = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+        return extension.matches("jpg|jpeg|png|gif|bmp|webp|svg");
     }
 
     /**

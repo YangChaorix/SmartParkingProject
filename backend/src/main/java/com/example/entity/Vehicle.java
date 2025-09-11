@@ -15,6 +15,8 @@ public class Vehicle {
     private String userName;
     // 创建时间
     private String createdAt;
+    // 删除时间
+    private String deletedAt;
 
     // 获取主键ID
     public Integer getId() {
@@ -64,5 +66,15 @@ public class Vehicle {
     // 设置创建时间
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // 获取删除时间
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    // 设置删除时间
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

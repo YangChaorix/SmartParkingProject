@@ -5,7 +5,9 @@
 <mapper namespace="com.example.mapper.AdminMapper">
 
     <select id="selectAll" resultType="com.example.entity.Admin">
-        select * from `admin`
+        select admin.*,
+               DATE_FORMAT(admin.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from `admin`
         <where>
             <if test="id != null"> and id= #{id}</if>
             <if test="username != null"> and username like concat('%', #{username}, '%')</if>
@@ -15,18 +17,27 @@
             <if test="email != null"> and email = #{email}</if>
             <if test="avatar != null"> and avatar = #{avatar}</if>
             <if test="role != null"> and role = #{role}</if>
+            and deleted_at is null
         </where>
     </select>
 
     <select id="selectById" resultType="com.example.entity.Admin">
-        select * from `admin`
-        where id = #{id}
+        select admin.*,
+               DATE_FORMAT(admin.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from `admin`
+        where id = #{id} and deleted_at is null
     </select>
 
     <delete id="deleteById">
         delete from `admin`
         where id = #{id}
     </delete>
+
+    <update id="softDeleteById">
+        update `admin` 
+        set deleted_at = NOW()
+        where id = #{id}
+    </update>
 
     <insert id="insert" parameterType="com.example.entity.Admin" useGeneratedKeys="true">
         insert into `admin`

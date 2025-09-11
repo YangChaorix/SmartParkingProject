@@ -15,46 +15,55 @@
     </div>
 
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-                @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" v-if="data.user.role === 'ADMIN'" />
-        <el-table-column prop="name" label="区域名称">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.name }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="total" label="总车位数">
-          <template #default="scope">
-            <span class="total-text">{{ scope.row.total }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="num" label="空闲车位">
-          <template #default="scope">
-            <el-tag :type="scope.row.num === 0 ? 'danger' : scope.row.num < 5 ? 'warning' : 'success'" effect="light">
-              {{ scope.row.num }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="地址名称" prop="address" min-width="180">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.address || '未设置' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="经纬度" prop="latitude" min-width="180">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.longitude ? `${scope.row.longitude},${scope.row.latitude}` : '未设置' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" v-if="data.user.role === 'ADMIN'">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button type="success" link @click="handlePricingRules(scope.row)">计费规则</el-button>
-              <el-button type="primary" link @click="handleEdit(scope.row)">编辑</el-button>
-              <el-button type="danger" link @click="del(scope.row.id)">删除</el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          @selection-change="handleSelectionChange"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55" v-if="data.user.role === 'ADMIN'" />
+          <el-table-column prop="name" label="区域名称" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.name }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="total" label="总车位数" width="100" align="center">
+            <template #default="scope">
+              <span class="total-text">{{ scope.row.total }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="num" label="空闲车位" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.num === 0 ? 'danger' : scope.row.num < 5 ? 'warning' : 'success'" effect="light">
+                {{ scope.row.num }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="地址名称" prop="address" min-width="200" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.address || '未设置' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="经纬度" prop="latitude" min-width="200" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.longitude ? `${scope.row.longitude},${scope.row.latitude}` : '未设置' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" v-if="data.user.role === 'ADMIN'">
+            <template #default="scope">
+              <div class="action-buttons">
+                <el-button type="success" link size="small" @click="handlePricingRules(scope.row)">计费规则</el-button>
+                <el-button type="primary" link size="small" @click="handleEdit(scope.row)">编辑</el-button>
+                <el-button type="danger" link size="small" @click="del(scope.row.id)">删除</el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <div class="pagination-wrapper" v-if="data.total">
         <el-pagination
@@ -63,7 +72,8 @@
             :total="data.total"
             @current-change="load"
             background
-            layout="total, prev, pager, next"
+            layout="total, prev, pager, next, sizes"
+            :page-sizes="[10, 20, 50, 100]"
         />
       </div>
     </div>
@@ -604,13 +614,40 @@ load()
 
 .table-card {
   position: relative;
-  padding-bottom: 60px;
+  padding-bottom: 80px;
+}
+
+.table-container {
+  max-height: 600px;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
 }
 
 .custom-table {
   width: 100%;
   border-radius: 8px;
   overflow: hidden;
+}
+
+/* 表格滚动条样式 */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 
 .table-cell-text {
@@ -651,9 +688,24 @@ load()
 }
 
 .pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.action-buttons .el-button {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
 }
 
 .location-input-wrapper {
@@ -700,5 +752,67 @@ load()
 .result-address {
   font-size: 12px;
   color: #909399;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .table-container {
+    max-height: 500px;
+  }
+  
+  .search-input {
+    width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .parking-container {
+    padding: 10px;
+  }
+  
+  .search-card,
+  .table-card {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .search-inputs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .search-input {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    justify-content: flex-start;
+  }
+  
+  .table-container {
+    max-height: 400px;
+  }
+  
+  .action-buttons .el-button {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-container {
+    max-height: 300px;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .action-buttons .el-button {
+    width: 100%;
+    font-size: 10px;
+  }
 }
 </style>

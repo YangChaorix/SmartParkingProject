@@ -21,8 +21,8 @@
           </el-badge>
           <el-dropdown>
             <div class="user-info">
-              <img v-if="data.user.avatar" :src="data.user?.avatar" alt="" class="avatar">
-              <img v-else src="@/assets/imgs/avatar.png" alt="" class="avatar">
+              <img v-if="data.user.avatar" :src="getAvatarUrl(data.user.avatar)" alt="" class="avatar">
+              <img v-else :src="getDefaultAvatar()" alt="" class="avatar">
               <span class="username">{{ data.user?.name }}</span>
             </div>
             <template #dropdown>
@@ -196,6 +196,25 @@ if (!data.user.id) {
 
 const updateUser = () => {
   data.user = JSON.parse(localStorage.getItem('xm-user') || '{}')   // 重新获取下用户的最新信息
+}
+
+// 获取头像URL，确保路径正确
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return getDefaultAvatar()
+  
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+  
+  // 如果是相对路径，添加基础URL
+  const baseUrl = import.meta.env.VITE_BASE_URL || ''
+  return baseUrl + avatar
+}
+
+// 获取默认头像
+const getDefaultAvatar = () => {
+  return new URL('/src/assets/imgs/avatar.png', import.meta.url).href
 }
 </script>
 

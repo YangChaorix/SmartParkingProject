@@ -23,6 +23,9 @@ export default defineConfig({
       resolvers: [ElementPlusResolver(), VantResolver()],
     }),
   ],
+  define: {
+    'import.meta.env.VITE_BASE_URL': JSON.stringify('http://localhost:9090')
+  },
   // 预加载项目必需的组件
   optimizeDeps: {
     include: [

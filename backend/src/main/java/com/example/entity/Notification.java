@@ -17,8 +17,8 @@ public class Notification {
     private Integer isRead;
     // 发送时间
     private Date sendTime;
-    // 逻辑删除标记(0-未删除,1-已删除)
-    private Integer deleted;
+    // 删除时间
+    private Date deletedAt;
 
     // 用户名  -- 用于查询用户名  -- 不属于本数据库里的字段
     private String username;
@@ -26,13 +26,13 @@ public class Notification {
     public Notification() {
     }
 
-    public Notification(Integer id, Integer userId, String description, Integer isRead, Date sendTime, Integer deleted, String username) {
+    public Notification(Integer id, Integer userId, String description, Integer isRead, Date sendTime, Date deletedAt, String username) {
         this.id = id;
         this.userId = userId;
         this.description = description;
         this.isRead = isRead;
         this.sendTime = sendTime;
-        this.deleted = deleted;
+        this.deletedAt = deletedAt;
         this.username = username;
     }
 
@@ -76,12 +76,12 @@ public class Notification {
         this.sendTime = sendTime;
     }
 
-    public Integer getDeleted() {
-        return deleted;
+    public Date getDeletedAt() {
+        return deletedAt;
     }
 
-    public void setDeleted(Integer deleted) {
-        this.deleted = deleted;
+    public void setDeletedAt(Date deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     public String getUsername() {
@@ -100,7 +100,7 @@ public class Notification {
                 ", description='" + description + '\'' +
                 ", isRead=" + isRead +
                 ", sendTime=" + sendTime +
-                ", deleted=" + deleted +
+                ", deletedAt=" + deletedAt +
                 ", username='" + username + '\'' +
                 '}';
     }

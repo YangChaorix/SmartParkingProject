@@ -31,22 +31,22 @@ public class VehicleService {
     }
 
     /**
-     * 根据ID删除车辆信息。
+     * 根据ID删除车辆信息（软删除）。
      *
      * @param id 车辆信息ID
      */
     public void deleteById(Integer id) {
-        vehicleMapper.deleteById(id); // 删除操作
+        vehicleMapper.softDeleteById(id); // 软删除操作
     }
 
     /**
-     * 批量删除车辆信息。
+     * 批量删除车辆信息（软删除）。
      *
      * @param ids 车辆信息ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            vehicleMapper.deleteById(id); // 批量删除操作
+            vehicleMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 

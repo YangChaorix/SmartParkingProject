@@ -12,6 +12,8 @@ public class Notice {
     private String content;
     // 发布时间
     private String time;
+    // 删除时间
+    private String deletedAt;
 
     // 获取ID
     public Integer getId() {
@@ -51,5 +53,15 @@ public class Notice {
     // 设置发布时间
     public void setTime(String time) {
         this.time = time;
+    }
+
+    // 获取删除时间
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    // 设置删除时间
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

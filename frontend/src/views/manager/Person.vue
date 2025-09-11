@@ -7,7 +7,7 @@
           <el-upload class="avatar-uploader" :action="baseUrl + '/files/upload'" :on-success="handleFileUpload"
             :show-file-list="false">
             <div class="avatar-wrapper">
-              <img v-if="data.user.avatar" alt="" :src="data.user.avatar" class="avatar" />
+              <img v-if="data.user.avatar" alt="" :src="getAvatarUrl(data.user.avatar)" class="avatar" />
               <el-icon v-else class="avatar-uploader-icon">
                 <Plus />
               </el-icon>
@@ -202,6 +202,25 @@ const handleFileUpload = (res) => {
   } else {
     ElMessage.error('头像上传失败')
   }
+}
+
+// 获取头像URL，确保路径正确
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return getDefaultAvatar()
+  
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+  
+  // 如果是相对路径，添加基础URL
+  const baseUrl = import.meta.env.VITE_BASE_URL || ''
+  return baseUrl + avatar
+}
+
+// 获取默认头像
+const getDefaultAvatar = () => {
+  return new URL('/src/assets/imgs/avatar.png', import.meta.url).href
 }
 
 // 初始加载个人信息

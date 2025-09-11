@@ -33,8 +33,8 @@ public class NotificationService {
     public void add(Notification notification) {
         // 标记 未读 0
         notification.setIsRead(0);
-        // 标记 是否逻辑删除 0
-        notification.setDeleted(0);
+        // 删除时间设为null（未删除）
+        notification.setDeletedAt(null);
         // 添加发送时间
         notification.setSendTime(new Date());
         notificationMapper.insert(notification);
@@ -122,7 +122,7 @@ public class NotificationService {
     }
 
     /**
-     * 删除通知
+     * 删除通知（软删除）
      * @param id 通知ID
      */
     public void deleteById(Integer id) {
@@ -130,7 +130,7 @@ public class NotificationService {
     }
 
     /**
-     * 批量删除通知
+     * 批量删除通知（软删除）
      * @param ids 批量通知ID
      */
     public void deleteBatch(List<Integer> ids) {

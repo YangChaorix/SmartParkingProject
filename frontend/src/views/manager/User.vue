@@ -17,65 +17,84 @@
 
     <!-- Table Section -->
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading"
-        @selection-change="handleSelectionChange">
-        <el-table-column type="selection" width="55" />
-        <el-table-column prop="username" label="账号">
-          <template #default="scope">
-            <span class="username-text">{{ scope.row.username }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="name" label="姓名">
-          <template #default="scope">
-            <span class="name-text">{{ scope.row.name }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="avatar" label="头像">
-          <template #default="scope">
-            <el-image v-if="scope.row.avatar" class="avatar-image" :src="scope.row.avatar"
-              :preview-src-list="[scope.row.avatar]" preview-teleported fit="cover" />
-          </template>
-        </el-table-column>
-        <el-table-column prop="role" label="角色">
-          <template #default="scope">
-            <el-tag :type="scope.row.role === 'ADMIN' ? 'danger' : 'primary'" effect="light">
-              {{ scope.row.role }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="phone" label="电话">
-          <template #default="scope">
-            <span class="info-text">{{ scope.row.phone }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="email" label="邮箱">
-          <template #default="scope">
-            <span class="info-text">{{ scope.row.email }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="account" label="余额">
-          <template #default="scope">
-            <span class="account-text">¥ {{ scope.row.account }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right">
-          <template #default="scope">
-            <div class="action-buttons">
-              <el-button type="primary" link @click="handleEdit(scope.row)">
-                编辑
-              </el-button>
-              <el-button type="danger" link @click="del(scope.row.id)">
-                删除
-              </el-button>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          @selection-change="handleSelectionChange"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column type="selection" width="55" />
+          <el-table-column prop="username" label="账号" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="username-text">{{ scope.row.username }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="name" label="姓名" min-width="100" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="name-text">{{ scope.row.name }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="avatar" label="头像" width="80" align="center">
+            <template #default="scope">
+              <el-image v-if="scope.row.avatar" class="avatar-image" :src="getAvatarUrl(scope.row.avatar)"
+                :preview-src-list="[getAvatarUrl(scope.row.avatar)]" preview-teleported fit="cover" />
+              <el-icon v-else class="avatar-placeholder">
+                <User />
+              </el-icon>
+            </template>
+          </el-table-column>
+          <el-table-column prop="role" label="角色" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.role === 'ADMIN' ? 'danger' : 'primary'" effect="light">
+                {{ scope.row.role }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="phone" label="电话" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="info-text">{{ scope.row.phone }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="info-text">{{ scope.row.email }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="account" label="余额" width="100" align="center">
+            <template #default="scope">
+              <span class="account-text">¥{{ scope.row.account }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200">
+            <template #default="scope">
+              <div class="operation-buttons">
+                <el-button type="primary" link size="small" @click="handleEdit(scope.row)">
+                  编辑
+                </el-button>
+                <el-button type="danger" link size="small" @click="del(scope.row.id)">
+                  删除
+                </el-button>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
       <!-- Pagination -->
       <div class="pagination-wrapper" v-if="data.total">
-        <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-          @current-change="load" background layout="total, prev, pager, next" />
+        <el-pagination 
+          v-model:current-page="data.pageNum" 
+          :page-size="data.pageSize" 
+          :total="data.total"
+          @current-change="load" 
+          background 
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[5, 10, 20, 50]"
+        />
       </div>
     </div>
 
@@ -121,7 +140,7 @@
 import { reactive, ref } from "vue"
 import request from "@/utils/request"
 import { ElMessage, ElMessageBox } from "element-plus"
-import { Plus } from '@element-plus/icons-vue'
+import { Plus, User } from '@element-plus/icons-vue'
 
 const baseUrl = import.meta.env.VITE_BASE_URL
 const data = reactive({
@@ -269,110 +288,113 @@ const reset = () => {
   load()
 }
 
+// 获取头像URL，确保路径正确
+const getAvatarUrl = (avatar) => {
+  if (!avatar) return ''
+  
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) {
+    return avatar
+  }
+  
+  // 如果是相对路径，添加基础URL
+  const baseUrl = import.meta.env.VITE_BASE_URL || ''
+  return baseUrl + avatar
+}
+
 // 初始化
 load()
 </script>
 
 <style scoped>
+@import '@/assets/css/responsive-table.css';
+
 .user-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  @apply responsive-container;
 }
 
-.search-card,
-.table-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.search-card:hover,
-.table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+.search-card {
+  @apply search-card;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
+  @apply search-wrapper;
 }
 
 .search-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  @apply search-inputs;
 }
 
 .search-input {
-  width: 240px;
+  @apply search-input;
 }
 
 .action-buttons {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  @apply action-buttons;
 }
 
 .table-card {
-  position: relative;
-  padding-bottom: 60px;
+  @apply table-card;
+}
+
+.table-container {
+  @apply table-container;
 }
 
 .custom-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
+  @apply custom-table;
 }
 
-.username-text {
-  font-weight: 500;
-  color: #409EFF;
+.operation-buttons {
+  @apply operation-buttons;
 }
 
-.name-text {
-  font-weight: 500;
-  color: #606266;
-}
-
-.info-text {
-  color: #606266;
-}
-
-.account-text {
-  color: #67C23A;
-  font-weight: 500;
-}
-
-.avatar-image {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  border: 2px solid #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
-}
-
-.avatar-image:hover {
-  transform: scale(1.1);
+.pagination-wrapper {
+  @apply pagination-wrapper;
 }
 
 .custom-dialog {
-  border-radius: 16px;
+  @apply custom-dialog;
 }
 
 .user-form {
-  padding: 20px;
+  @apply custom-form;
 }
 
 .custom-input {
-  width: 100%;
+  @apply custom-input;
+}
+
+.username-text {
+  @apply username-text;
+}
+
+.name-text {
+  @apply name-text;
+}
+
+.info-text {
+  @apply info-text;
+}
+
+.account-text {
+  @apply account-text;
+}
+
+.avatar-image {
+  @apply avatar-image;
+}
+
+.avatar-placeholder {
+  font-size: 24px;
+  color: #c0c4cc;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #f5f7fa;
 }
 
 .avatar-uploader {
@@ -411,47 +433,5 @@ load()
   width: 100%;
   height: 100%;
   border-radius: 6px;
-}
-
-.el-button {
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.el-button:hover {
-  transform: translateY(-1px);
-}
-
-.pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-}
-
-/* Animation classes */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.table-card {
-  animation: slideIn 0.4s ease;
 }
 </style>

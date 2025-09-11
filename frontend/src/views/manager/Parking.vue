@@ -18,66 +18,81 @@
 
     <!-- Table Section -->
     <div class="table-card">
-      <el-table :data="data.tableData" stripe class="custom-table" v-loading="data.loading">
-        <el-table-column prop="userName" label="用户">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.userName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="vehicleName" label="车牌号">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.vehicleName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="locationName" label="区域名称">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.locationName }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="parkingLotName" label="车位编号" />
-        <el-table-column prop="startTime" label="入场时间">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.startTime }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="endTime" label="出场时间">
-          <template #default="scope">
-            <span class="table-cell-text">{{ scope.row.endTime }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="停车时长">
-          <template #default="scope">
-            <span class="table-cell-text">{{ calculateDuration(scope.row.startTime, scope.row.endTime || new
-            Date()) }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态">
-          <template #default="scope">
-            <el-tag :type="scope.row.status === '已出场' ? 'success' : 'warning'" effect="light">
-              {{ scope.row.status }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="180" fixed="right" v-if="data.user.role === 'ADMIN'">
-          <template #default="scope">
-            <div class="operation-buttons">
-              <template v-if="scope.row.status !== '已出场'">
-                <el-button type="primary" link @click="handleEdit(scope.row)">
-                  车辆出场
-                </el-button>
-                <el-button type="warning" link @click="handleNotification(scope.row)">
-                  提醒
-                </el-button>
-              </template>
-            </div>
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="table-container">
+        <el-table 
+          :data="data.tableData" 
+          stripe 
+          class="custom-table" 
+          v-loading="data.loading"
+          :max-height="600"
+          style="width: 100%"
+        >
+          <el-table-column prop="userName" label="用户" min-width="100" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.userName }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="vehicleName" label="车牌号" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="plate-text">{{ scope.row.vehicleName }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="locationName" label="区域名称" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="location-text">{{ scope.row.locationName }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="parkingLotName" label="车位编号" min-width="100" show-overflow-tooltip />
+          <el-table-column prop="startTime" label="入场时间" min-width="160" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.startTime }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="endTime" label="出场时间" min-width="160" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ scope.row.endTime || '-' }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="停车时长" min-width="120" show-overflow-tooltip>
+            <template #default="scope">
+              <span class="table-cell-text">{{ calculateDuration(scope.row.startTime, scope.row.endTime || new Date()) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="status" label="状态" width="100" align="center">
+            <template #default="scope">
+              <el-tag :type="scope.row.status === '已出场' ? 'success' : 'warning'" effect="light">
+                {{ scope.row.status }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="200" v-if="data.user.role === 'ADMIN'">
+            <template #default="scope">
+              <div class="operation-buttons">
+                <template v-if="scope.row.status !== '已出场'">
+                  <el-button type="primary" link size="small" @click="handleEdit(scope.row)">
+                    车辆出场
+                  </el-button>
+                  <el-button type="warning" link size="small" @click="handleNotification(scope.row)">
+                    提醒
+                  </el-button>
+                </template>
+              </div>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
 
-      <!-- Pagination moved inside table card -->
+      <!-- Pagination -->
       <div class="pagination-wrapper" v-if="data.total">
-        <el-pagination v-model:current-page="data.pageNum" :page-size="data.pageSize" :total="data.total"
-                       @current-change="load" background layout="total, prev, pager, next" />
+        <el-pagination 
+          v-model:current-page="data.pageNum" 
+          :page-size="data.pageSize" 
+          :total="data.total"
+          @current-change="load" 
+          background 
+          layout="total, prev, pager, next, sizes"
+          :page-sizes="[5, 10, 20, 50]"
+        />
       </div>
     </div>
 
@@ -392,151 +407,74 @@ load()
 </script>
 
 <style scoped>
+@import '@/assets/css/responsive-table.css';
+
 .parking-container {
-  padding: 20px;
-  background-color: #f5f7fa;
-  min-height: 100vh;
+  @apply responsive-container;
 }
 
-.search-card,
-.action-card,
-.table-card,
-.pagination-card {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
-  padding: 20px;
-  margin-bottom: 20px;
-  transition: all 0.3s ease;
-}
-
-.search-card:hover,
-.action-card:hover,
-.table-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+.search-card {
+  @apply search-card;
 }
 
 .search-wrapper {
-  display: flex;
-  align-items: center;
+  @apply search-wrapper;
 }
 
 .search-inputs {
-  display: flex;
-  align-items: center;
-  gap: 16px;
+  @apply search-inputs;
 }
 
 .search-input {
-  width: 240px;
+  @apply search-input;
 }
 
 .search-select {
-  width: 200px;
-  /* 新增：为下拉框设置宽度 */
-}
-
-.custom-table {
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.table-cell-text {
-  font-size: 14px;
-  color: #606266;
-}
-
-.custom-dialog {
-  border-radius: 16px;
-}
-
-.parking-form {
-  padding: 20px;
-}
-
-.custom-select {
-  width: 100%;
-}
-
-.el-button {
-  border-radius: 8px;
-  transition: all 0.3s ease;
-}
-
-.el-button:hover {
-  transform: translateY(-1px);
-}
-
-.el-tag {
-  border-radius: 6px;
-  padding: 4px 8px;
-}
-
-.pagination-card {
-  display: flex;
-  justify-content: center;
-  padding: 16px;
-}
-
-/* Animation classes */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-@keyframes slideIn {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  @apply search-select;
 }
 
 .table-card {
-  position: relative;
-  padding-bottom: 60px;
-  /* Make room for pagination */
+  @apply table-card;
 }
 
-.pagination-wrapper {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
+.table-container {
+  @apply table-container;
 }
 
-.editor-toolbar {
-  padding: 8px;
-  border-bottom: 1px solid #dcdfe6;
+.custom-table {
+  @apply custom-table;
 }
 
-.editor-toolbar .el-button {
-  padding: 6px 8px;
-}
-
-.editor-toolbar .active {
-  background-color: #ecf5ff;
-  color: #409eff;
-}
-
-.el-input-group__prepend .el-button+.el-button {
-  margin-left: 4px;
+.table-cell-text {
+  @apply table-cell-text;
 }
 
 .operation-buttons {
-  display: flex;
-  gap: 8px;
-  align-items: center;
+  @apply operation-buttons;
+}
+
+.pagination-wrapper {
+  @apply pagination-wrapper;
+}
+
+.custom-dialog {
+  @apply custom-dialog;
+}
+
+.parking-form {
+  @apply custom-form;
+}
+
+.custom-select {
+  @apply custom-select;
+}
+
+.plate-text {
+  @apply plate-text;
+}
+
+.location-text {
+  @apply location-text;
 }
 
 .notification-dialog :deep(.el-dialog) {

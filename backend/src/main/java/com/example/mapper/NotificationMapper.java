@@ -9,14 +9,14 @@ import org.apache.ibatis.annotations.Update;
 import java.util.List;
 
 public interface NotificationMapper {
-    @Insert("INSERT INTO notification (user_id, description, is_read, send_time, deleted) " +
-            "VALUES (#{userId}, #{description}, #{isRead}, #{sendTime}, #{deleted})")
+    @Insert("INSERT INTO notification (user_id, description, is_read, send_time, deleted_at) " +
+            "VALUES (#{userId}, #{description}, #{isRead}, #{sendTime}, #{deletedAt})")
     void insert(Notification notification);
 
-    @Update("UPDATE notification SET deleted = 1 WHERE id = #{id}")
+    @Update("UPDATE notification SET deleted_at = NOW() WHERE id = #{id}")
     void deleteById(Integer id);
 
-    @Update("UPDATE notification SET deleted = 1 WHERE id IN " + "(#{ids})")
+    @Update("UPDATE notification SET deleted_at = NOW() WHERE id IN " + "(#{ids})")
     void deleteBatch(List<Integer> ids);
 
     void updateById(Notification notification);
@@ -31,6 +31,6 @@ public interface NotificationMapper {
     @Delete("DELETE FROM notification WHERE id = #{id}")
     void deleteReal(Integer id);
 
-    @Select("SELECT COUNT(*) FROM notification WHERE user_id = #{userId} AND is_read = 0 AND deleted = 0")
+    @Select("SELECT COUNT(*) FROM notification WHERE user_id = #{userId} AND is_read = 0 AND deleted_at IS NULL")
     Integer selectUnreadCount(Integer userId);
 }

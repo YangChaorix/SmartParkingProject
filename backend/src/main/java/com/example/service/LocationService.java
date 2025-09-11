@@ -33,7 +33,7 @@ public class LocationService {
     }
 
     /**
-     * 根据ID删除停车区域。
+     * 根据ID删除停车区域（软删除）。
      * @param id 停车区域ID
      */
     public void deleteById(Integer id) {
@@ -41,16 +41,16 @@ public class LocationService {
         if (location.getTotal() > 0) {
             throw new CustomException("500", "该区域有停车位信息，暂不支持删除"); // 检查是否有关联的停车位信息
         }
-        locationMapper.deleteById(id); // 删除操作
+        locationMapper.softDeleteById(id); // 软删除操作
     }
 
     /**
-     * 批量删除停车区域。
+     * 批量删除停车区域（软删除）。
      * @param ids 停车区域ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            locationMapper.deleteById(id); // 批量删除操作
+            locationMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 

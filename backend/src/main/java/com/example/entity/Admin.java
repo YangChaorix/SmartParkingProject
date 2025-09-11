@@ -21,6 +21,8 @@ public class Admin extends Account {
     private String phone;
     // 邮箱
     private String email;
+    // 删除时间
+    private String deletedAt;
 
     // 获取ID
     public Integer getId() {
@@ -106,5 +108,15 @@ public class Admin extends Account {
     // 设置邮箱
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    // 获取删除时间
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    // 设置删除时间
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

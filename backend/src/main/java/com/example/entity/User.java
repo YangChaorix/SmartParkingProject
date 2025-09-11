@@ -23,6 +23,8 @@ public class User extends Account {
     private String email;
     // 余额
     private Double account;
+    // 删除时间
+    private String deletedAt;
 
     // 获取主键ID
     public Integer getId() {
@@ -112,5 +114,15 @@ public class User extends Account {
     // 设置余额
     public void setAccount(Double account) {
         this.account = account;
+    }
+
+    // 获取删除时间
+    public String getDeletedAt() {
+        return deletedAt;
+    }
+
+    // 设置删除时间
+    public void setDeletedAt(String deletedAt) {
+        this.deletedAt = deletedAt;
     }
 }

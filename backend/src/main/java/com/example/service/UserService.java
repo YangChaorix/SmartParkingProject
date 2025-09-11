@@ -50,20 +50,20 @@ public class UserService {
     }
 
     /**
-     * 根据ID删除用户。
+     * 根据ID删除用户（软删除）。
      * @param id 用户ID
      */
     public void deleteById(Integer id) {
-        userMapper.deleteById(id); // 删除操作
+        userMapper.softDeleteById(id); // 软删除操作
     }
 
     /**
-     * 批量删除用户。
+     * 批量删除用户（软删除）。
      * @param ids 用户ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            userMapper.deleteById(id); // 批量删除操作
+            userMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 

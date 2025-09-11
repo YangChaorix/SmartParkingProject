@@ -42,12 +42,12 @@ public class ParkingLotService {
     }
 
     /**
-     * 根据ID删除车位。
+     * 根据ID删除车位（软删除）。
      * @param id 车位ID
      */
     public void deleteById(Integer id) {
         ParkingLot parkingLot = parkingLotMapper.selectById(id); // 查询操作
-        parkingLotMapper.deleteById(id); // 删除操作
+        parkingLotMapper.softDeleteById(id); // 软删除操作
         Location location = locationService.selectById(parkingLot.getLocationId());
         location.setTotal(location.getTotal() - 1);
         if ("空闲".equals(parkingLot.getStatus())) {
@@ -57,12 +57,12 @@ public class ParkingLotService {
     }
 
     /**
-     * 批量删除车位。
+     * 批量删除车位（软删除）。
      * @param ids 车位ID列表
      */
     public void deleteBatch(List<Integer> ids) {
         for (Integer id : ids) {
-            parkingLotMapper.deleteById(id); // 批量删除操作
+            parkingLotMapper.softDeleteById(id); // 批量软删除操作
         }
     }
 

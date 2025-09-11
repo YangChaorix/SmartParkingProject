@@ -5,7 +5,9 @@
 <mapper namespace="com.example.mapper.ParkingLotMapper">
 
     <select id="selectAll" resultType="com.example.entity.ParkingLot">
-        select parking_lot.*, location.name as locationName from parking_lot
+        select parking_lot.*, location.name as locationName,
+               DATE_FORMAT(parking_lot.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from parking_lot
         left join location on parking_lot.location_id = location.id
         <where>
             <if test="id != null"> and parking_lot.id = #{id}</if>
@@ -13,18 +15,27 @@
             <if test="locationId != null"> and parking_lot.location_id = #{locationId}</if>
             <if test="locationName != null"> and location.name like concat('%', #{locationName}, '%')</if>
             <if test="status != null"> and parking_lot.status like concat('%', #{status}, '%')</if>
+            and parking_lot.deleted_at is null
         </where>
     </select>
 
     <select id="selectById" resultType="com.example.entity.ParkingLot">
-        select * from `parking_lot`
-        where id = #{id}
+        select parking_lot.*,
+               DATE_FORMAT(parking_lot.deleted_at, '%Y-%m-%d %H:%i:%s') as deletedAt 
+        from `parking_lot`
+        where id = #{id} and deleted_at is null
     </select>
 
     <delete id="deleteById">
         delete from `parking_lot`
         where id = #{id}
     </delete>
+
+    <update id="softDeleteById">
+        update `parking_lot` 
+        set deleted_at = NOW()
+        where id = #{id}
+    </update>
 
     <insert id="insert" parameterType="com.example.entity.ParkingLot" useGeneratedKeys="true" keyProperty="id">
         insert into `parking_lot`

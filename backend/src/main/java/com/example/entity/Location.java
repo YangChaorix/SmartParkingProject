@@ -29,6 +29,8 @@ public class Location {
     private BigDecimal latitude;
     // 计费规则
     private String pricingRules;
+    // 删除时间
+    private String deletedAt;
 
     // 停车场列表（非表字段）
     private List<ParkingLot> parkingLots;
@@ -73,4 +75,7 @@ public class Location {
 
     public List<ParkingLot> getParkingLots() { return parkingLots; }
     public void setParkingLots(List<ParkingLot> parkingLots) { this.parkingLots = parkingLots; }
+
+    public String getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(String deletedAt) { this.deletedAt = deletedAt; }
 }

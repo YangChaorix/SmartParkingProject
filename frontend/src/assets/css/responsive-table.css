@@ -1,0 +1,313 @@
+/* 通用响应式表格样式 */
+
+/* 容器样式 */
+.responsive-container {
+  padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* 搜索卡片样式 */
+.search-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+}
+
+.search-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+}
+
+.search-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.search-inputs {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.search-input {
+  width: 240px;
+}
+
+.search-select {
+  width: 200px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* 表格卡片样式 */
+.table-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 80px;
+}
+
+.table-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.08);
+}
+
+/* 表格容器 */
+.table-container {
+  max-height: 600px;
+  overflow: auto;
+  border-radius: 8px;
+  border: 1px solid #ebeef5;
+}
+
+.custom-table {
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* 表格滚动条样式 */
+.table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* 表格文本样式 */
+.table-cell-text {
+  font-size: 14px;
+  color: #606266;
+}
+
+/* 操作按钮样式 */
+.operation-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.operation-buttons .el-button {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+/* 分页器样式 */
+.pagination-wrapper {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 通用按钮样式 */
+.el-button {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.el-button:hover {
+  transform: translateY(-1px);
+}
+
+/* 标签样式 */
+.el-tag {
+  border-radius: 6px;
+  padding: 4px 8px;
+}
+
+/* 对话框样式 */
+.custom-dialog {
+  border-radius: 16px;
+}
+
+/* 表单样式 */
+.custom-form {
+  padding: 20px;
+}
+
+.custom-input,
+.custom-select {
+  width: 100%;
+}
+
+/* 动画效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.table-card {
+  animation: slideIn 0.4s ease;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .table-container {
+    max-height: 500px;
+  }
+  
+  .search-input {
+    width: 200px;
+  }
+  
+  .search-select {
+    width: 180px;
+  }
+}
+
+@media (max-width: 768px) {
+  .responsive-container {
+    padding: 10px;
+  }
+  
+  .search-card,
+  .table-card {
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .search-inputs {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  
+  .search-input,
+  .search-select {
+    width: 100%;
+  }
+  
+  .action-buttons {
+    justify-content: flex-start;
+  }
+  
+  .table-container {
+    max-height: 400px;
+  }
+  
+  .operation-buttons .el-button {
+    font-size: 11px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-container {
+    max-height: 300px;
+  }
+  
+  .operation-buttons {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .operation-buttons .el-button {
+    width: 100%;
+    font-size: 10px;
+  }
+  
+  .pagination-wrapper {
+    margin-top: 15px;
+  }
+}
+
+/* 特殊文本样式 */
+.username-text {
+  font-weight: 500;
+  color: #409EFF;
+}
+
+.name-text {
+  font-weight: 500;
+  color: #606266;
+}
+
+.info-text {
+  color: #606266;
+}
+
+.account-text {
+  color: #67C23A;
+  font-weight: 500;
+}
+
+.price-text {
+  color: #f56c6c;
+  font-weight: 500;
+}
+
+.plate-text {
+  color: #409EFF;
+  font-weight: 500;
+}
+
+.user-text {
+  color: #606266;
+}
+
+.location-text {
+  color: #409EFF;
+  font-weight: 500;
+}
+
+/* 头像样式 */
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.avatar-image:hover {
+  transform: scale(1.1);
+}
